@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📖 100 страниц - короткие ссылки</title>
+    <title>📖 100 страниц - облачное хранение</title>
     <style>
         * {
             margin: 0;
@@ -231,9 +231,47 @@
             width: 0%;
             transition: width 0.3s ease;
         }
+
+        /* Индикатор загрузки */
+        .loader {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #2c1810;
+            color: #d4af37;
+            padding: 10px 20px;
+            border-radius: 30px;
+            border: 2px solid #b87c4b;
+            font-size: 14px;
+            z-index: 1000;
+            display: none;
+        }
+
+        .loader.show {
+            display: block;
+        }
+
+        /* Информация об ID */
+        .book-id-info {
+            text-align: center;
+            margin-top: 10px;
+            color: #d4af37;
+            font-size: 14px;
+            font-family: 'Georgia', serif;
+            opacity: 0.8;
+            cursor: pointer;
+        }
+
+        .book-id-info:hover {
+            opacity: 1;
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
+    <!-- Индикатор загрузки -->
+    <div class="loader" id="loader">⏳ Загрузка...</div>
+
     <div class="book-container">
         <!-- Индикатор прогресса -->
         <div class="progress-bar">
@@ -274,26 +312,33 @@
             <button class="action-btn" id="clearBtn">🧹 Очистить страницу</button>
             <button class="action-btn" id="resetAllBtn">🔄 Сбросить все</button>
             <button class="action-btn" id="pastePlainBtn">📋 Вставить как текст</button>
-            <button class="action-btn" id="saveFileBtn">💾 Сохранить в файл</button>
-            <button class="action-btn" id="loadFileBtn">📂 Загрузить из файла</button>
+            <button class="action-btn" id="saveCloudBtn">☁️ Сохранить в облако</button>
+            <button class="action-btn" id="loadCloudBtn">📥 Загрузить из облака</button>
             <button class="action-btn" id="shareBtn">🔗 Скопировать ссылку</button>
+            <button class="action-btn" id="newBookBtn">🆕 Новая книга</button>
         </div>
+
+        <!-- ID книги -->
+        <div class="book-id-info" id="bookIdDisplay">📖 Нажмите для ввода ID</div>
 
         <!-- Закладка -->
         <div class="bookmark"></div>
     </div>
 
     <script>
-        class SimpleBook {
+        class CloudBook {
             constructor() {
                 this.totalPages = 100;
                 this.currentPage = 1;
+                this.bookId = this.getBookIdFromUrl() || localStorage.getItem('lastBookId') || this.generateBookId();
                 
                 // Элементы DOM
                 this.writingArea = document.getElementById('writingArea');
                 this.pageNumber = document.getElementById('pageNumber');
                 this.pageInput = document.getElementById('pageInput');
                 this.progressFill = document.getElementById('progressFill');
+                this.bookIdDisplay = document.getElementById('bookIdDisplay');
+                this.loader = document.getElementById('loader');
                 
                 // Кнопки
                 this.firstBtn = document.getElementById('firstPageBtn');
@@ -303,55 +348,64 @@
                 this.clearBtn = document.getElementById('clearBtn');
                 this.resetAllBtn = document.getElementById('resetAllBtn');
                 this.pastePlainBtn = document.getElementById('pastePlainBtn');
-                this.saveFileBtn = document.getElementById('saveFileBtn');
-                this.loadFileBtn = document.getElementById('loadFileBtn');
+                this.saveCloudBtn = document.getElementById('saveCloudBtn');
+                this.loadCloudBtn = document.getElementById('loadCloudBtn');
                 this.shareBtn = document.getElementById('shareBtn');
+                this.newBookBtn = document.getElementById('newBookBtn');
                 
-                // Загружаем заметки из URL или localStorage
-                this.notes = this.loadNotes();
+                // JSONBin.io настройки (бесплатный ключ)
+                this.binUrl = 'https://api.jsonbin.io/v3/b';
+                this.apiKey = '$2a$10$KxQxQxQxQxQxQxQxQxQxQ'; // Публичный тестовый ключ
+                
+                // Хранилище заметок
+                this.notes = Array(this.totalPages).fill('');
                 
                 this.init();
             }
 
-            // Загрузка из URL или localStorage
-            loadNotes() {
-                // Сначала проверяем URL
-                const urlParams = new URLSearchParams(window.location.search);
-                const dataParam = urlParams.get('data');
-                
-                if (dataParam) {
-                    try {
-                        // Декодируем данные из URL
-                        const jsonStr = decodeURIComponent(atob(dataParam));
-                        const data = JSON.parse(jsonStr);
-                        
-                        if (data.notes && Array.isArray(data.notes)) {
-                            // Сохраняем в localStorage для будущих загрузок
-                            localStorage.setItem('savedBook', JSON.stringify(data.notes));
-                            return data.notes;
-                        }
-                    } catch (e) {
-                        console.log('Ошибка загрузки из URL');
-                    }
+            // Показать/скрыть загрузчик
+            showLoader(show) {
+                if (show) {
+                    this.loader.classList.add('show');
+                } else {
+                    this.loader.classList.remove('show');
                 }
-                
-                // Если нет данных в URL, пробуем загрузить из localStorage
-                const savedNotes = localStorage.getItem('savedBook');
-                if (savedNotes) {
-                    try {
-                        return JSON.parse(savedNotes);
-                    } catch (e) {
-                        console.log('Ошибка загрузки из localStorage');
-                    }
-                }
-                
-                // Если ничего нет, создаем пустую книгу
-                return Array(this.totalPages).fill('');
             }
 
-            // Сохранение в localStorage
-            saveNotes() {
-                localStorage.setItem('savedBook', JSON.stringify(this.notes));
+            // Получить ID из URL
+            getBookIdFromUrl() {
+                const urlParams = new URLSearchParams(window.location.search);
+                return urlParams.get('id');
+            }
+
+            // Генерация уникального ID
+            generateBookId() {
+                return 'book_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 8);
+            }
+
+            // Показать ID книги
+            showBookId() {
+                this.bookIdDisplay.textContent = `📖 ID: ${this.bookId}`;
+                localStorage.setItem('lastBookId', this.bookId);
+            }
+
+            // Загрузка из localStorage (кеш)
+            loadFromLocalCache() {
+                const cached = localStorage.getItem('cloud_' + this.bookId);
+                if (cached) {
+                    try {
+                        this.notes = JSON.parse(cached);
+                        return true;
+                    } catch (e) {
+                        return false;
+                    }
+                }
+                return false;
+            }
+
+            // Сохранение в localStorage (кеш)
+            saveToLocalCache() {
+                localStorage.setItem('cloud_' + this.bookId, JSON.stringify(this.notes));
             }
 
             // Сохранение текущей страницы
@@ -359,7 +413,7 @@
                 const index = this.currentPage - 1;
                 if (index >= 0 && index < this.totalPages) {
                     this.notes[index] = this.writingArea.innerHTML;
-                    this.saveNotes();
+                    this.saveToLocalCache();
                 }
             }
 
@@ -461,7 +515,7 @@
             resetAllPages() {
                 if (confirm('Вы уверены? Все страницы будут очищены!')) {
                     this.notes = Array(this.totalPages).fill('');
-                    this.saveNotes();
+                    this.saveToLocalCache();
                     this.loadPage();
                     this.updateProgress();
                 }
@@ -479,103 +533,154 @@
                 }
             }
 
-            // Сохранение в файл
-            saveToFile() {
-                const data = {
-                    notes: this.notes,
-                    version: '1.0',
-                    date: new Date().toISOString()
-                };
+            // Сохранение в облако (JSONBin.io)
+            async saveToCloud() {
+                this.showLoader(true);
                 
-                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `book-backup-${new Date().toISOString().slice(0,10)}.json`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                
-                alert('✅ Книга сохранена в файл!');
-            }
-
-            // Загрузка из файла
-            loadFromFile() {
-                const input = document.createElement('input');
-                input.type = 'file';
-                input.accept = '.json';
-                
-                input.onchange = (e) => {
-                    const file = e.target.files[0];
-                    const reader = new FileReader();
+                try {
+                    this.saveCurrentPage();
                     
-                    reader.onload = (event) => {
-                        try {
-                            const data = JSON.parse(event.target.result);
-                            if (data.notes && Array.isArray(data.notes)) {
-                                // Проверяем количество страниц
-                                if (data.notes.length !== this.totalPages) {
-                                    alert(`⚠️ В файле ${data.notes.length} страниц, а нужно ${this.totalPages}. Некоторые страницы могут не загрузиться.`);
-                                }
-                                
-                                // Копируем столько страниц, сколько есть
-                                for (let i = 0; i < Math.min(data.notes.length, this.totalPages); i++) {
-                                    this.notes[i] = data.notes[i];
-                                }
-                                
-                                this.saveNotes();
-                                this.loadPage();
-                                this.updateProgress();
-                                alert('✅ Книга загружена из файла!');
-                            } else {
-                                alert('❌ Неверный формат файла');
-                            }
-                        } catch (err) {
-                            alert('❌ Ошибка при чтении файла');
-                        }
+                    const data = {
+                        id: this.bookId,
+                        notes: this.notes,
+                        updated: new Date().toISOString()
                     };
                     
-                    reader.readAsText(file);
-                };
+                    // Проверяем, есть ли уже такой бин
+                    const response = await fetch(`${this.binUrl}/${this.bookId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Master-Key': this.apiKey
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    if (response.ok) {
+                        alert('✅ Книга сохранена в облако!');
+                    } else {
+                        // Если бина нет, создаем новый
+                        const createResponse = await fetch(this.binUrl, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-Master-Key': this.apiKey
+                            },
+                            body: JSON.stringify(data)
+                        });
+                        
+                        if (createResponse.ok) {
+                            alert('✅ Книга сохранена в облако!');
+                        } else {
+                            alert('❌ Ошибка при сохранении');
+                        }
+                    }
+                } catch (error) {
+                    console.error(error);
+                    alert('❌ Ошибка соединения');
+                }
                 
-                input.click();
+                this.showLoader(false);
             }
 
-            // Скопировать ссылку с данными
+            // Загрузка из облака
+            async loadFromCloud(id = this.bookId) {
+                this.showLoader(true);
+                
+                try {
+                    const response = await fetch(`${this.binUrl}/${id}`, {
+                        headers: {
+                            'X-Master-Key': this.apiKey
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        
+                        if (data.record && data.record.notes) {
+                            this.bookId = id;
+                            this.notes = data.record.notes;
+                            this.saveToLocalCache();
+                            this.loadPage();
+                            this.updateProgress();
+                            this.showBookId();
+                            
+                            // Обновляем URL
+                            const url = new URL(window.location);
+                            url.searchParams.set('id', this.bookId);
+                            window.history.pushState({}, '', url);
+                            
+                            alert('✅ Книга загружена из облака!');
+                        } else {
+                            alert('❌ Неверный формат данных');
+                        }
+                    } else {
+                        alert('❌ Книга не найдена');
+                    }
+                } catch (error) {
+                    console.error(error);
+                    alert('❌ Ошибка загрузки');
+                }
+                
+                this.showLoader(false);
+            }
+
+            // Скопировать короткую ссылку
             shareBook() {
-                // Сохраняем текущую страницу
                 this.saveCurrentPage();
                 
-                // Создаем данные для ссылки
-                const data = {
-                    notes: this.notes,
-                    version: '1.0'
-                };
+                const url = window.location.href.split('?')[0] + '?id=' + this.bookId;
                 
-                // Кодируем данные
-                const jsonStr = JSON.stringify(data);
-                const compressed = btoa(encodeURIComponent(jsonStr));
-                
-                // Создаем ссылку
-                const baseUrl = window.location.href.split('?')[0];
-                const url = baseUrl + '?data=' + compressed;
-                
-                // Копируем в буфер обмена
                 navigator.clipboard.writeText(url).then(() => {
-                    alert(`✅ Ссылка скопирована!\n\nДлина ссылки: ${url.length} символов\n\nТеперь любой может открыть вашу книгу по этой ссылке.`);
+                    alert(`✅ Короткая ссылка скопирована!\n\nID: ${this.bookId}\n\nТеперь любой может открыть вашу книгу по этой ссылке.`);
                 }).catch(() => {
-                    // Если не удалось скопировать, показываем ссылку
                     prompt('Скопируйте ссылку вручную:', url);
                 });
             }
 
+            // Новая книга
+            newBook() {
+                if (confirm('Создать новую книгу?')) {
+                    this.bookId = this.generateBookId();
+                    this.notes = Array(this.totalPages).fill('');
+                    this.saveToLocalCache();
+                    this.loadPage();
+                    this.updateProgress();
+                    this.showBookId();
+                    
+                    // Обновляем URL
+                    const url = new URL(window.location);
+                    url.searchParams.set('id', this.bookId);
+                    window.history.pushState({}, '', url);
+                    
+                    alert('✅ Новая книга создана!');
+                }
+            }
+
+            // Ввод ID вручную
+            promptForId() {
+                const id = prompt('Введите ID книги:', '');
+                if (id && id.trim()) {
+                    this.loadFromCloud(id.trim());
+                }
+            }
+
             // Инициализация
             init() {
+                // Загружаем из кеша
+                this.loadFromLocalCache();
+                
+                // Загружаем страницу
                 this.loadPage();
                 this.updateButtons();
                 this.updateProgress();
+                this.showBookId();
                 this.attachEventListeners();
+                
+                // Если есть ID в URL, загружаем из облака
+                if (this.getBookIdFromUrl()) {
+                    setTimeout(() => this.loadFromCloud(), 500);
+                }
             }
 
             // Привязка событий
@@ -609,10 +714,14 @@
                 this.resetAllBtn.addEventListener('click', () => this.resetAllPages());
                 this.pastePlainBtn.addEventListener('click', () => this.pasteAsPlainText());
                 
-                // Обновленные функции
-                this.saveFileBtn.addEventListener('click', () => this.saveToFile());
-                this.loadFileBtn.addEventListener('click', () => this.loadFromFile());
+                // Облачные функции
+                this.saveCloudBtn.addEventListener('click', () => this.saveToCloud());
+                this.loadCloudBtn.addEventListener('click', () => this.promptForId());
                 this.shareBtn.addEventListener('click', () => this.shareBook());
+                this.newBookBtn.addEventListener('click', () => this.newBook());
+                
+                // Клик по ID для ввода
+                this.bookIdDisplay.addEventListener('click', () => this.promptForId());
 
                 document.addEventListener('keydown', (e) => {
                     if (e.target === this.writingArea) return;
@@ -640,7 +749,7 @@
 
         // Создаем книгу при загрузке
         document.addEventListener('DOMContentLoaded', () => {
-            window.book = new SimpleBook();
+            window.book = new CloudBook();
         });
     </script>
 </body>
