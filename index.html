@@ -63,27 +63,57 @@
             transform: scale(1.05);
         }
 
-        /* Панель управления шрифтом */
-        .font-panel {
+        /* Кнопка для показа/скрытия панели шрифтов */
+        .toggle-font-panel {
             position: fixed;
             bottom: 20px;
+            right: 20px;
+            background: #d4af37;
+            border: 2px solid #b87c4b;
+            border-radius: 50px;
+            padding: 15px 25px;
+            color: #2c1810;
+            cursor: pointer;
+            font-family: 'Georgia', serif;
+            font-weight: bold;
+            z-index: 1001;
+            font-size: 16px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+            transition: all 0.3s;
+        }
+
+        .toggle-font-panel:hover {
+            background: #e5c158;
+            transform: scale(1.05);
+        }
+
+        /* Панель управления шрифтом (изначально скрыта) */
+        .font-panel {
+            position: fixed;
+            bottom: 90px;
             right: 20px;
             background: rgba(44, 24, 16, 0.95);
             border: 2px solid #b87c4b;
             border-radius: 50px;
             padding: 15px 25px;
-            display: flex;
+            display: none;
             gap: 15px;
             flex-wrap: wrap;
             z-index: 1000;
             backdrop-filter: blur(5px);
             box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+            max-width: 90vw;
+        }
+
+        .font-panel.show {
+            display: flex;
         }
 
         .font-group {
             display: flex;
             gap: 5px;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .font-btn {
@@ -309,8 +339,11 @@
     <button class="install-btn" id="installBtn">📥 Установить на ПК</button>
     <div class="offline-badge" id="offlineBadge">📴 Работает без интернета</div>
 
-    <!-- Панель управления шрифтом -->
-    <div class="font-panel">
+    <!-- Кнопка для показа/скрытия панели шрифтов -->
+    <button class="toggle-font-panel" id="toggleFontPanel">✎ Настройки шрифта</button>
+
+    <!-- Панель управления шрифтом (скрыта по умолчанию) -->
+    <div class="font-panel" id="fontPanel">
         <div class="font-group">
             <button class="font-btn active" onclick="changeFont('default')">📝 Обычный</button>
             <button class="font-btn" onclick="changeFont('hand')">✍️ Рукописный</button>
@@ -421,6 +454,20 @@
             }, 1500);
         }
 
+        // Функция для показа/скрытия панели шрифтов
+        function toggleFontPanel() {
+            const panel = document.getElementById('fontPanel');
+            const btn = document.getElementById('toggleFontPanel');
+            
+            if (panel.classList.contains('show')) {
+                panel.classList.remove('show');
+                btn.textContent = '✎ Настройки шрифта';
+            } else {
+                panel.classList.add('show');
+                btn.textContent = '✕ Закрыть настройки';
+            }
+        }
+
         // Загружаем сохраненные настройки
         function loadFontSettings() {
             const page = document.querySelector('.page');
@@ -428,7 +475,19 @@
             const savedSize = localStorage.getItem('fontSize');
             const savedLine = localStorage.getItem('lineHeight');
             
-            if (savedFont) changeFont(savedFont);
+            if (savedFont) {
+                // Активируем нужную кнопку
+                const btns = document.querySelectorAll('.font-btn');
+                btns.forEach(btn => {
+                    if (btn.textContent.includes('Обычный') && savedFont === 'default') btn.classList.add('active');
+                    if (btn.textContent.includes('Рукописный') && savedFont === 'hand') btn.classList.add('active');
+                    if (btn.textContent.includes('Печатный') && savedFont === 'print') btn.classList.add('active');
+                    if (btn.textContent.includes('Современный') && savedFont === 'modern') btn.classList.add('active');
+                });
+                
+                // Применяем шрифт
+                changeFont(savedFont);
+            }
             if (savedSize) page.style.fontSize = savedSize + 'px';
             if (savedLine) page.style.lineHeight = savedLine;
         }
@@ -455,7 +514,12 @@
                 this.init();
                 this.checkOnline();
                 this.setupInstall();
-                loadFontSettings(); // Загружаем настройки шрифта
+                
+                // Настраиваем кнопку для панели шрифтов
+                document.getElementById('toggleFontPanel').addEventListener('click', toggleFontPanel);
+                
+                // Загружаем настройки шрифта
+                loadFontSettings();
             }
 
             checkOnline() {
