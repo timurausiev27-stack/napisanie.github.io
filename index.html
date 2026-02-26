@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="ru">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>📚 Мои книги</title>
-
+    
     <!-- Для установки на ПК -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2b4b3c">
-
+    
+    <!-- Подключаем разные шрифты -->
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Comfortaa:wght@300;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    
     <style>
         * {
             margin: 0;
@@ -49,7 +51,7 @@
             display: none;
             z-index: 1000;
             font-size: 16px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
 
         .install-btn.show {
@@ -61,13 +63,80 @@
             transform: scale(1.05);
         }
 
+        /* Панель управления шрифтом */
+        .font-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(44, 24, 16, 0.95);
+            border: 2px solid #b87c4b;
+            border-radius: 50px;
+            padding: 15px 25px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        }
+
+        .font-group {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .font-btn {
+            background: rgba(184, 124, 75, 0.3);
+            border: 1px solid #b87c4b;
+            border-radius: 30px;
+            padding: 8px 15px;
+            color: #d4af37;
+            cursor: pointer;
+            font-family: 'Georgia', serif;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .font-btn:hover {
+            background: rgba(184, 124, 75, 0.5);
+            transform: scale(1.05);
+        }
+
+        .font-btn.active {
+            background: #d4af37;
+            color: #2c1810;
+        }
+
+        .size-btn {
+            background: rgba(184, 124, 75, 0.3);
+            border: 1px solid #b87c4b;
+            border-radius: 30px;
+            padding: 8px 15px;
+            color: #d4af37;
+            cursor: pointer;
+            font-family: 'Georgia', serif;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .size-btn:hover {
+            background: rgba(184, 124, 75, 0.5);
+        }
+
+        .separator {
+            width: 1px;
+            background: #b87c4b;
+            margin: 0 5px;
+        }
+
         .page {
             width: 100%;
             height: 700px;
             max-height: 80vh;
             background: #fffcf0;
             border-radius: 20px;
-            box-shadow:
+            box-shadow: 
                 0 20px 40px rgba(0, 0, 0, 0.6),
                 0 0 0 2px #b87c4b,
                 0 0 0 6px #5d3a1a;
@@ -78,6 +147,7 @@
             font-size: 18px;
             color: #3b2b1a;
             line-height: 1.8;
+            transition: all 0.2s;
         }
 
         .page-header {
@@ -93,7 +163,6 @@
         }
 
         .book-title {
-            font-size: 20px;
             font-weight: bold;
             color: #6b4a2c;
         }
@@ -104,10 +173,10 @@
             outline: none;
             white-space: pre-wrap;
             word-wrap: break-word;
-            font-family: 'Courier New', 'Georgia', serif;
-            font-size: 18px;
-            line-height: 1.8;
-            color: #3b2b1a;
+            font-family: inherit;
+            font-size: inherit;
+            line-height: inherit;
+            color: inherit;
         }
 
         .writing-area:empty:before {
@@ -227,7 +296,8 @@
             border-radius: 30px;
             font-size: 14px;
             display: none;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 1000;
         }
 
         .offline-badge.show {
@@ -235,10 +305,36 @@
         }
     </style>
 </head>
-
 <body>
     <button class="install-btn" id="installBtn">📥 Установить на ПК</button>
     <div class="offline-badge" id="offlineBadge">📴 Работает без интернета</div>
+
+    <!-- Панель управления шрифтом -->
+    <div class="font-panel">
+        <div class="font-group">
+            <button class="font-btn active" onclick="changeFont('default')">📝 Обычный</button>
+            <button class="font-btn" onclick="changeFont('hand')">✍️ Рукописный</button>
+            <button class="font-btn" onclick="changeFont('print')">🖨️ Печатный</button>
+            <button class="font-btn" onclick="changeFont('modern')">💻 Современный</button>
+        </div>
+        
+        <div class="separator"></div>
+        
+        <div class="font-group">
+            <button class="size-btn" onclick="changeSize(14)">A-</button>
+            <button class="size-btn" onclick="changeSize(18)">A</button>
+            <button class="size-btn" onclick="changeSize(22)">A+</button>
+            <button class="size-btn" onclick="changeSize(26)">A++</button>
+        </div>
+        
+        <div class="separator"></div>
+        
+        <div class="font-group">
+            <button class="size-btn" onclick="changeLine(1.4)">Строки ▼</button>
+            <button class="size-btn" onclick="changeLine(1.8)">Строки •</button>
+            <button class="size-btn" onclick="changeLine(2.2)">Строки ▲</button>
+        </div>
+    </div>
 
     <div class="book-container">
         <div class="books-panel">
@@ -246,13 +342,16 @@
             <div class="books-list" id="booksList"></div>
         </div>
 
-        <div class="page">
+        <div class="page" id="page">
             <div class="page-header">
                 <span class="book-title" id="currentBookTitle">Книга 1</span>
                 <span>✎</span>
             </div>
-
-            <div id="writingArea" class="writing-area" contenteditable="true" placeholder="✍️ Пиши что хочешь...">
+            
+            <div id="writingArea" 
+                 class="writing-area" 
+                 contenteditable="true"
+                 placeholder="✍️ Пиши что хочешь...">
             </div>
         </div>
 
@@ -268,6 +367,72 @@
     </div>
 
     <script>
+        // Функции для смены шрифта
+        function changeFont(style) {
+            const page = document.querySelector('.page');
+            const activeBtns = document.querySelectorAll('.font-btn');
+            
+            // Убираем активный класс у всех кнопок
+            activeBtns.forEach(btn => btn.classList.remove('active'));
+            
+            // Добавляем активный класс нажатой кнопке
+            event.target.classList.add('active');
+            
+            // Меняем шрифт
+            switch(style) {
+                case 'default':
+                    page.style.fontFamily = "'Courier New', 'Georgia', serif";
+                    break;
+                case 'hand':
+                    page.style.fontFamily = "'Caveat', 'Courier New', cursive";
+                    break;
+                case 'print':
+                    page.style.fontFamily = "'Times New Roman', 'Georgia', serif";
+                    break;
+                case 'modern':
+                    page.style.fontFamily = "'Roboto', 'Arial', sans-serif";
+                    break;
+            }
+            
+            // Сохраняем настройки
+            localStorage.setItem('fontStyle', style);
+            showStatus('✨ Шрифт изменен');
+        }
+
+        function changeSize(size) {
+            const page = document.querySelector('.page');
+            page.style.fontSize = size + 'px';
+            localStorage.setItem('fontSize', size);
+            showStatus('📏 Размер: ' + size + 'px');
+        }
+
+        function changeLine(line) {
+            const page = document.querySelector('.page');
+            page.style.lineHeight = line;
+            localStorage.setItem('lineHeight', line);
+            showStatus('📐 Интервал: ' + line);
+        }
+
+        function showStatus(message) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            setTimeout(() => {
+                status.textContent = '';
+            }, 1500);
+        }
+
+        // Загружаем сохраненные настройки
+        function loadFontSettings() {
+            const page = document.querySelector('.page');
+            const savedFont = localStorage.getItem('fontStyle');
+            const savedSize = localStorage.getItem('fontSize');
+            const savedLine = localStorage.getItem('lineHeight');
+            
+            if (savedFont) changeFont(savedFont);
+            if (savedSize) page.style.fontSize = savedSize + 'px';
+            if (savedLine) page.style.lineHeight = savedLine;
+        }
+
         // Регистрируем Service Worker для офлайн работы
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js')
@@ -275,6 +440,7 @@
                 .catch(err => console.log('❌ Ошибка:', err));
         }
 
+        // Код книги (твой основной код)
         class BookApp {
             constructor() {
                 this.writingArea = document.getElementById('writingArea');
@@ -282,24 +448,25 @@
                 this.currentBookTitle = document.getElementById('currentBookTitle');
                 this.status = document.getElementById('status');
                 this.offlineBadge = document.getElementById('offlineBadge');
-
+                
                 this.books = {};
                 this.currentBookId = null;
-
+                
                 this.init();
                 this.checkOnline();
                 this.setupInstall();
+                loadFontSettings(); // Загружаем настройки шрифта
             }
 
             checkOnline() {
                 window.addEventListener('offline', () => {
                     this.offlineBadge.classList.add('show');
                 });
-
+                
                 window.addEventListener('online', () => {
                     this.offlineBadge.classList.remove('show');
                 });
-
+                
                 if (!navigator.onLine) {
                     this.offlineBadge.classList.add('show');
                 }
@@ -308,7 +475,7 @@
             setupInstall() {
                 let deferredPrompt;
                 const installBtn = document.getElementById('installBtn');
-
+                
                 window.addEventListener('beforeinstallprompt', (e) => {
                     e.preventDefault();
                     deferredPrompt = e;
@@ -317,10 +484,10 @@
 
                 installBtn.addEventListener('click', async () => {
                     if (!deferredPrompt) return;
-
+                    
                     deferredPrompt.prompt();
                     const { outcome } = await deferredPrompt.userChoice;
-
+                    
                     if (outcome === 'accepted') {
                         installBtn.classList.remove('show');
                     }
@@ -329,15 +496,15 @@
 
             init() {
                 const loaded = this.loadFromUrl();
-
+                
                 if (!loaded) {
                     this.loadFromStorage();
                 }
-
+                
                 if (Object.keys(this.books).length === 0) {
                     this.createNewBook('Моя книга');
                 }
-
+                
                 this.renderBooksList();
                 this.attachEvents();
             }
@@ -345,27 +512,27 @@
             loadFromUrl() {
                 const urlParams = new URLSearchParams(window.location.search);
                 const data = urlParams.get('data');
-
+                
                 if (data) {
                     try {
                         const jsonStr = decodeURIComponent(atob(data));
                         const loadedData = JSON.parse(jsonStr);
-
+                        
                         if (loadedData.books) {
                             this.books = loadedData.books;
                             this.currentBookId = loadedData.currentBook || Object.keys(this.books)[0];
-
+                            
                             this.saveToStorage();
-
+                            
                             if (this.currentBookId && this.books[this.currentBookId]) {
                                 this.writingArea.innerHTML = this.books[this.currentBookId].content;
                                 this.currentBookTitle.textContent = this.books[this.currentBookId].title;
                             }
-
+                            
                             this.showStatus('📖 Книги загружены из ссылки');
                             return true;
                         }
-                    } catch (e) { }
+                    } catch (e) {}
                 }
                 return false;
             }
@@ -381,16 +548,16 @@
                     try {
                         this.books = JSON.parse(saved);
                         this.currentBookId = localStorage.getItem('lastBook');
-
+                        
                         if (!this.currentBookId || !this.books[this.currentBookId]) {
                             this.currentBookId = Object.keys(this.books)[0];
                         }
-
+                        
                         if (this.currentBookId && this.books[this.currentBookId]) {
                             this.writingArea.innerHTML = this.books[this.currentBookId].content;
                             this.currentBookTitle.textContent = this.books[this.currentBookId].title;
                         }
-                    } catch (e) { }
+                    } catch (e) {}
                 }
             }
 
@@ -412,7 +579,7 @@
                 if (this.currentBookId) {
                     this.books[this.currentBookId].content = this.writingArea.innerHTML;
                 }
-
+                
                 this.currentBookId = id;
                 this.writingArea.innerHTML = this.books[id].content;
                 this.currentBookTitle.textContent = this.books[id].title;
@@ -425,19 +592,19 @@
                     this.showStatus('❌ Нельзя удалить последнюю книгу');
                     return;
                 }
-
+                
                 if (confirm(`Удалить книгу "${this.books[this.currentBookId].title}"?`)) {
                     const deletedId = this.currentBookId;
                     const bookIds = Object.keys(this.books);
                     const currentIndex = bookIds.indexOf(deletedId);
                     const nextIndex = currentIndex > 0 ? currentIndex - 1 : 1;
-
+                    
                     delete this.books[deletedId];
                     this.currentBookId = bookIds[nextIndex];
-
+                    
                     this.writingArea.innerHTML = this.books[this.currentBookId].content;
                     this.currentBookTitle.textContent = this.books[this.currentBookId].title;
-
+                    
                     this.saveToStorage();
                     this.renderBooksList();
                     this.showStatus('🗑️ Книга удалена');
@@ -457,18 +624,18 @@
 
             shareCurrentBook() {
                 this.books[this.currentBookId].content = this.writingArea.innerHTML;
-
+                
                 const shareData = {
                     books: {
                         [this.currentBookId]: this.books[this.currentBookId]
                     },
                     currentBook: this.currentBookId
                 };
-
+                
                 const jsonStr = JSON.stringify(shareData);
                 const encoded = btoa(encodeURIComponent(jsonStr));
                 const url = window.location.href.split('?')[0] + '?data=' + encoded;
-
+                
                 navigator.clipboard.writeText(url).then(() => {
                     this.showStatus('✅ Ссылка скопирована!');
                 }).catch(() => {
@@ -478,7 +645,7 @@
 
             renderBooksList() {
                 let html = '';
-
+                
                 for (let [id, book] of Object.entries(this.books)) {
                     html += `
                         <div class="book-tab ${id === this.currentBookId ? 'active' : ''}">
@@ -487,33 +654,33 @@
                         </div>
                     `;
                 }
-
+                
                 this.booksList.innerHTML = html;
             }
 
             deleteBook(id, event) {
                 event.stopPropagation();
-
+                
                 if (Object.keys(this.books).length <= 1) {
                     this.showStatus('❌ Нельзя удалить последнюю книгу');
                     return;
                 }
-
+                
                 if (confirm(`Удалить книгу "${this.books[id].title}"?`)) {
                     if (id === this.currentBookId) {
                         const bookIds = Object.keys(this.books);
                         const currentIndex = bookIds.indexOf(id);
                         const nextIndex = currentIndex > 0 ? currentIndex - 1 : 1;
-
+                        
                         delete this.books[id];
                         this.currentBookId = bookIds[nextIndex];
-
+                        
                         this.writingArea.innerHTML = this.books[this.currentBookId].content;
                         this.currentBookTitle.textContent = this.books[this.currentBookId].title;
                     } else {
                         delete this.books[id];
                     }
-
+                    
                     this.saveToStorage();
                     this.renderBooksList();
                     this.showStatus('🗑️ Книга удалена');
@@ -556,5 +723,4 @@
         window.app = app;
     </script>
 </body>
-
 </html>
