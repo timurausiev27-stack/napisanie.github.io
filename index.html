@@ -114,6 +114,10 @@
             font-size: 14px;
         }
 
+        .font-btn:hover {
+            background: rgba(184, 124, 75, 0.5);
+        }
+
         .font-btn.active {
             background: #d4af37;
             color: #2c1810;
@@ -129,6 +133,10 @@
             font-family: 'Georgia', serif;
             min-width: 40px;
             text-align: center;
+        }
+
+        .size-btn:hover {
+            background: rgba(184, 124, 75, 0.5);
         }
 
         .separator {
@@ -215,6 +223,7 @@
             padding: 40px 50px;
             position: relative;
             overflow-y: auto;
+            /* Базовые стили будут переопределяться через js */
             font-family: 'Courier New', 'Georgia', serif;
             font-size: 18px;
             color: #3b2b1a;
@@ -332,34 +341,34 @@
     <!-- Панель управления шрифтом -->
     <div class="font-panel" id="fontPanel">
         <div class="font-group">
-            <button class="font-btn active" onclick="changeFont('default')">📝 Обычный</button>
-            <button class="font-btn" onclick="changeFont('hand')">✍️ Рукописный</button>
-            <button class="font-btn" onclick="changeFont('print')">🖨️ Печатный</button>
-            <button class="font-btn" onclick="changeFont('modern')">💻 Современный</button>
+            <button class="font-btn" data-font="default">📝 Обычный</button>
+            <button class="font-btn" data-font="hand">✍️ Рукописный</button>
+            <button class="font-btn" data-font="print">🖨️ Печатный</button>
+            <button class="font-btn" data-font="modern">💻 Современный</button>
         </div>
         
         <div class="separator"></div>
         
         <div class="font-group">
-            <button class="size-btn" onclick="changeSize(14)">A-</button>
-            <button class="size-btn" onclick="changeSize(18)">A</button>
-            <button class="size-btn" onclick="changeSize(22)">A+</button>
-            <button class="size-btn" onclick="changeSize(26)">A++</button>
+            <button class="size-btn" data-size="14">A-</button>
+            <button class="size-btn" data-size="18">A</button>
+            <button class="size-btn" data-size="22">A+</button>
+            <button class="size-btn" data-size="26">A++</button>
         </div>
         
         <div class="separator"></div>
         
         <div class="font-group">
-            <button class="size-btn" onclick="changeLine(1.4)">Строки ▼</button>
-            <button class="size-btn" onclick="changeLine(1.8)">Строки •</button>
-            <button class="size-btn" onclick="changeLine(2.2)">Строки ▲</button>
+            <button class="size-btn" data-line="1.4">Строки ▼</button>
+            <button class="size-btn" data-line="1.8">Строки •</button>
+            <button class="size-btn" data-line="2.2">Строки ▲</button>
         </div>
     </div>
 
     <div class="book-container">
         <!-- Панель со всеми книгами -->
         <div class="books-panel">
-            <span style="color: #d4af37;">📚 Мои книги ({totalBooks}):</span>
+            <span style="color: #d4af37;">📚 Мои книги (<span id="bookCount">0</span>):</span>
             <div class="books-list" id="booksList"></div>
             <button class="action-btn" id="addFromLinkBtn" style="padding: 5px 15px;">➕ Добавить по ссылке</button>
         </div>
@@ -391,69 +400,6 @@
     </div>
 
     <script>
-        // Функции для смены шрифта
-        function changeFont(style) {
-            const page = document.querySelector('.page');
-            const activeBtns = document.querySelectorAll('.font-btn');
-            
-            activeBtns.forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            switch(style) {
-                case 'default':
-                    page.style.fontFamily = "'Courier New', 'Georgia', serif";
-                    break;
-                case 'hand':
-                    page.style.fontFamily = "'Caveat', 'Courier New', cursive";
-                    break;
-                case 'print':
-                    page.style.fontFamily = "'Times New Roman', 'Georgia', serif";
-                    break;
-                case 'modern':
-                    page.style.fontFamily = "'Roboto', 'Arial', sans-serif";
-                    break;
-            }
-            
-            localStorage.setItem('fontStyle', style);
-            showStatus('✨ Шрифт изменен');
-        }
-
-        function changeSize(size) {
-            const page = document.querySelector('.page');
-            page.style.fontSize = size + 'px';
-            localStorage.setItem('fontSize', size);
-            showStatus('📏 Размер: ' + size + 'px');
-        }
-
-        function changeLine(line) {
-            const page = document.querySelector('.page');
-            page.style.lineHeight = line;
-            localStorage.setItem('lineHeight', line);
-            showStatus('📐 Интервал: ' + line);
-        }
-
-        function showStatus(message) {
-            const status = document.getElementById('status');
-            status.textContent = message;
-            setTimeout(() => {
-                status.textContent = '';
-            }, 1500);
-        }
-
-        // Функция для показа/скрытия панели шрифтов
-        function toggleFontPanel() {
-            const panel = document.getElementById('fontPanel');
-            const btn = document.getElementById('toggleFontPanel');
-            
-            if (panel.classList.contains('show')) {
-                panel.classList.remove('show');
-                btn.textContent = '✎ Настройки шрифта';
-            } else {
-                panel.classList.add('show');
-                btn.textContent = '✕ Закрыть настройки';
-            }
-        }
-
         class BookApp {
             constructor() {
                 this.writingArea = document.getElementById('writingArea');
@@ -461,39 +407,122 @@
                 this.currentBookTitle = document.getElementById('currentBookTitle');
                 this.status = document.getElementById('status');
                 this.offlineBadge = document.getElementById('offlineBadge');
+                this.page = document.getElementById('page');
+                this.bookCount = document.getElementById('bookCount');
                 
-                // Единый массив для всех книг (без меток)
+                // Единый массив для всех книг
                 this.books = [];
                 this.currentBookId = null;
+                
+                // Сначала загружаем настройки шрифта
+                this.loadFontSettings();
                 
                 this.init();
                 this.checkOnline();
                 this.setupInstall();
                 
-                document.getElementById('toggleFontPanel').addEventListener('click', toggleFontPanel);
+                document.getElementById('toggleFontPanel').addEventListener('click', () => this.toggleFontPanel());
                 document.getElementById('addFromLinkBtn').addEventListener('click', () => this.addFromLink());
                 
-                this.loadFontSettings();
+                // Назначаем обработчики для кнопок шрифта
+                this.setupFontButtons();
             }
 
+            // Загрузка настроек шрифта из localStorage
             loadFontSettings() {
-                const page = document.querySelector('.page');
-                const savedFont = localStorage.getItem('fontStyle');
-                const savedSize = localStorage.getItem('fontSize');
-                const savedLine = localStorage.getItem('lineHeight');
+                // Загружаем шрифт
+                const savedFont = localStorage.getItem('fontStyle') || 'default';
+                const savedSize = localStorage.getItem('fontSize') || '18';
+                const savedLine = localStorage.getItem('lineHeight') || '1.8';
                 
-                if (savedFont) {
-                    const btns = document.querySelectorAll('.font-btn');
-                    btns.forEach(btn => {
-                        if (btn.textContent.includes('Обычный') && savedFont === 'default') btn.classList.add('active');
-                        if (btn.textContent.includes('Рукописный') && savedFont === 'hand') btn.classList.add('active');
-                        if (btn.textContent.includes('Печатный') && savedFont === 'print') btn.classList.add('active');
-                        if (btn.textContent.includes('Современный') && savedFont === 'modern') btn.classList.add('active');
-                    });
-                    changeFont(savedFont);
+                // Применяем к странице
+                this.applyFont(savedFont);
+                this.page.style.fontSize = savedSize + 'px';
+                this.page.style.lineHeight = savedLine;
+            }
+
+            // Применить шрифт
+            applyFont(style) {
+                switch(style) {
+                    case 'default':
+                        this.page.style.fontFamily = "'Courier New', 'Georgia', serif";
+                        break;
+                    case 'hand':
+                        this.page.style.fontFamily = "'Caveat', 'Courier New', cursive";
+                        break;
+                    case 'print':
+                        this.page.style.fontFamily = "'Times New Roman', 'Georgia', serif";
+                        break;
+                    case 'modern':
+                        this.page.style.fontFamily = "'Roboto', 'Arial', sans-serif";
+                        break;
                 }
-                if (savedSize) page.style.fontSize = savedSize + 'px';
-                if (savedLine) page.style.lineHeight = savedLine;
+                localStorage.setItem('fontStyle', style);
+            }
+
+            // Настройка кнопок шрифта
+            setupFontButtons() {
+                // Кнопки шрифта
+                document.querySelectorAll('.font-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        // Убираем активный класс у всех
+                        document.querySelectorAll('.font-btn').forEach(b => b.classList.remove('active'));
+                        // Добавляем активный класс нажатой кнопке
+                        e.target.classList.add('active');
+                        
+                        const font = e.target.dataset.font;
+                        this.applyFont(font);
+                        this.showStatus('✨ Шрифт изменен');
+                    });
+                });
+
+                // Кнопки размера
+                document.querySelectorAll('.size-btn[data-size]').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const size = e.target.dataset.size;
+                        this.page.style.fontSize = size + 'px';
+                        localStorage.setItem('fontSize', size);
+                        this.showStatus('📏 Размер: ' + size + 'px');
+                    });
+                });
+
+                // Кнопки интервала
+                document.querySelectorAll('.size-btn[data-line]').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const line = e.target.dataset.line;
+                        this.page.style.lineHeight = line;
+                        localStorage.setItem('lineHeight', line);
+                        this.showStatus('📐 Интервал: ' + line);
+                    });
+                });
+
+                // Активируем нужную кнопку шрифта при загрузке
+                const savedFont = localStorage.getItem('fontStyle') || 'default';
+                document.querySelectorAll('.font-btn').forEach(btn => {
+                    if (btn.dataset.font === savedFont) {
+                        btn.classList.add('active');
+                    }
+                });
+            }
+
+            toggleFontPanel() {
+                const panel = document.getElementById('fontPanel');
+                const btn = document.getElementById('toggleFontPanel');
+                
+                if (panel.classList.contains('show')) {
+                    panel.classList.remove('show');
+                    btn.textContent = '✎ Настройки шрифта';
+                } else {
+                    panel.classList.add('show');
+                    btn.textContent = '✕ Закрыть настройки';
+                }
+            }
+
+            showStatus(message) {
+                this.status.textContent = message;
+                setTimeout(() => {
+                    this.status.textContent = '';
+                }, 1500);
             }
 
             // Добавить книгу по ссылке
@@ -513,7 +542,6 @@
                             const bookId = Object.keys(bookData.books)[0];
                             const book = bookData.books[bookId];
                             
-                            // Добавляем в общий массив (без пометок)
                             this.books.push({
                                 id: 'book_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
                                 title: book.title,
@@ -523,7 +551,6 @@
                             this.saveBooks();
                             this.renderBooksList();
                             
-                            // Переключаем на новую книгу
                             this.currentBookId = this.books[this.books.length - 1].id;
                             this.loadCurrentBook();
                             
@@ -570,8 +597,8 @@
             }
 
             init() {
-                // Сначала пробуем загрузить из URL
-                const loaded = this.loadFromUrl();
+                // Загружаем из URL если есть
+                this.loadFromUrl();
                 
                 // Загружаем все книги из хранилища
                 this.loadBooks();
@@ -581,7 +608,7 @@
                     this.createNewBook('Моя книга');
                 }
                 
-                // Если есть currentBookId, загружаем его, иначе первую книгу
+                // Загружаем последнюю открытую книгу
                 const lastBookId = localStorage.getItem('lastBookId');
                 if (lastBookId && this.books.find(b => b.id === lastBookId)) {
                     this.currentBookId = lastBookId;
@@ -594,7 +621,6 @@
                 this.attachEvents();
             }
 
-            // Загрузка из URL (при переходе по ссылке)
             loadFromUrl() {
                 const urlParams = new URLSearchParams(window.location.search);
                 const data = urlParams.get('data');
@@ -608,7 +634,6 @@
                             const bookId = Object.keys(bookData.books)[0];
                             const book = bookData.books[bookId];
                             
-                            // Добавляем в общий массив (без пометок)
                             this.books.push({
                                 id: 'book_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
                                 title: book.title,
@@ -624,12 +649,11 @@
                 return false;
             }
 
-            // Сохранить все книги
             saveBooks() {
                 localStorage.setItem('allBooks', JSON.stringify(this.books));
+                this.bookCount.textContent = this.books.length;
             }
 
-            // Загрузить все книги
             loadBooks() {
                 const saved = localStorage.getItem('allBooks');
                 if (saved) {
@@ -639,7 +663,6 @@
                 }
             }
 
-            // Загрузить текущую книгу
             loadCurrentBook() {
                 const book = this.books.find(b => b.id === this.currentBookId);
                 if (book) {
@@ -649,7 +672,6 @@
                 }
             }
 
-            // Создать новую книгу
             createNewBook(title) {
                 const newBook = {
                     id: 'book_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
@@ -665,9 +687,7 @@
                 this.showStatus('✅ Новая книга создана');
             }
 
-            // Переключить книгу
             switchBook(id) {
-                // Сохраняем текущую книгу
                 const currentBook = this.books.find(b => b.id === this.currentBookId);
                 if (currentBook) {
                     currentBook.content = this.writingArea.innerHTML;
@@ -679,7 +699,6 @@
                 this.renderBooksList();
             }
 
-            // Удалить текущую книгу
             deleteCurrentBook() {
                 if (this.books.length <= 1) {
                     this.showStatus('❌ Нельзя удалить последнюю книгу');
@@ -690,10 +709,8 @@
                 if (confirm(`Удалить книгу "${currentBook.title}"?`)) {
                     const currentIndex = this.books.findIndex(b => b.id === this.currentBookId);
                     
-                    // Удаляем книгу
                     this.books = this.books.filter(b => b.id !== this.currentBookId);
                     
-                    // Выбираем другую книгу
                     const newIndex = currentIndex > 0 ? currentIndex - 1 : 0;
                     this.currentBookId = this.books[newIndex].id;
                     
@@ -704,7 +721,6 @@
                 }
             }
 
-            // Переименовать текущую книгу
             renameCurrentBook() {
                 const book = this.books.find(b => b.id === this.currentBookId);
                 const newTitle = prompt('Новое название:', book.title);
@@ -717,7 +733,6 @@
                 }
             }
 
-            // Поделиться текущей книгой
             shareCurrentBook() {
                 const book = this.books.find(b => b.id === this.currentBookId);
                 book.content = this.writingArea.innerHTML;
@@ -743,7 +758,6 @@
                 });
             }
 
-            // Удалить книгу по клику на крестик
             deleteBook(id, event) {
                 event.stopPropagation();
                 
@@ -770,13 +784,9 @@
                 }
             }
 
-            // Отобразить список всех книг
             renderBooksList() {
                 let html = '';
-                let totalBooks = this.books.length;
-                
-                // Обновляем счетчик
-                document.querySelector('.books-panel span').innerHTML = `📚 Мои книги (${totalBooks}):`;
+                this.bookCount.textContent = this.books.length;
                 
                 this.books.forEach(book => {
                     const isActive = book.id === this.currentBookId ? 'active' : '';
@@ -793,7 +803,6 @@
             }
 
             attachEvents() {
-                // Автосохранение
                 this.writingArea.addEventListener('input', () => {
                     const book = this.books.find(b => b.id === this.currentBookId);
                     if (book) {
@@ -802,7 +811,6 @@
                     }
                 });
 
-                // Кнопки
                 document.getElementById('addBookBtn').addEventListener('click', () => {
                     const title = prompt('Название новой книги:', 'Новая книга');
                     if (title) this.createNewBook(title);
