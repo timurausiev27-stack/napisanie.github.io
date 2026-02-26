@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📖 100 страниц - твоя книга</title>
+    <title>📖 100 страниц с облачным хранением</title>
     <style>
         * {
             margin: 0;
@@ -34,7 +35,7 @@
             max-height: 85vh;
             background: #fffcf0;
             border-radius: 20px;
-            box-shadow: 
+            box-shadow:
                 0 20px 40px rgba(0, 0, 0, 0.6),
                 0 0 0 2px #b87c4b,
                 0 0 0 6px #5d3a1a;
@@ -118,7 +119,7 @@
             padding: 15px 30px;
             border-radius: 60px;
             border: 2px solid #b87c4b;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
         }
 
         .nav-btn {
@@ -231,9 +232,93 @@
             width: 0%;
             transition: width 0.3s ease;
         }
+
+        /* Индикатор загрузки */
+        .loader {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #2c1810;
+            color: #d4af37;
+            padding: 10px 20px;
+            border-radius: 30px;
+            border: 2px solid #b87c4b;
+            font-size: 14px;
+            z-index: 1000;
+            display: none;
+        }
+
+        .loader.show {
+            display: block;
+        }
+
+        /* Модальное окно для ID */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .modal-content {
+            background: #fffcf0;
+            padding: 30px;
+            border-radius: 20px;
+            border: 3px solid #b87c4b;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            color: #2c1810;
+            margin-bottom: 20px;
+            font-family: 'Georgia', serif;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 12px;
+            font-size: 18px;
+            border: 2px solid #b87c4b;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            background: white;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            background: #d4af37;
+            color: #2c1810;
+        }
+
+        .modal-btn.secondary {
+            background: #8b6b4f;
+            color: white;
+        }
     </style>
 </head>
+
 <body>
+    <!-- Индикатор загрузки -->
+    <div class="loader" id="loader">⏳ Сохранение...</div>
+
     <div class="book-container">
         <!-- Индикатор прогресса -->
         <div class="progress-bar">
@@ -246,12 +331,10 @@
                 <span class="page-number" id="pageNumber">Страница 1</span>
                 <span class="page-decoration">✎</span>
             </div>
-            
+
             <!-- Область для письма -->
-            <div id="writingArea" 
-                 class="writing-area" 
-                 contenteditable="true"
-                 placeholder="✍️ Кликните здесь и начинайте писать...">
+            <div id="writingArea" class="writing-area" contenteditable="true"
+                placeholder="✍️ Кликните здесь и начинайте писать...">
             </div>
         </div>
 
@@ -259,12 +342,12 @@
         <div class="navigation">
             <button class="nav-btn" id="firstPageBtn" title="Первая страница">⏮</button>
             <button class="nav-btn" id="prevPageBtn" title="Предыдущая страница">◀</button>
-            
+
             <div class="page-info">
                 <input type="number" id="pageInput" class="page-input" min="1" max="100" value="1">
                 <span>/ 100</span>
             </div>
-            
+
             <button class="nav-btn" id="nextPageBtn" title="Следующая страница">▶</button>
             <button class="nav-btn" id="lastPageBtn" title="Последняя страница">⏭</button>
         </div>
@@ -274,13 +357,25 @@
             <button class="action-btn" id="clearBtn">🧹 Очистить страницу</button>
             <button class="action-btn" id="resetAllBtn">🔄 Сбросить все</button>
             <button class="action-btn" id="pastePlainBtn">📋 Вставить как текст</button>
-            <button class="action-btn" id="saveFileBtn">💾 Сохранить в файл</button>
-            <button class="action-btn" id="loadFileBtn">📂 Загрузить из файла</button>
-            <button class="action-btn" id="shareBtn">🔗 Скопировать ссылку</button>
+            <button class="action-btn" id="saveCloudBtn">☁️ Сохранить в облако</button>
+            <button class="action-btn" id="loadCloudBtn">⬇️ Загрузить из облака</button>
+            <button class="action-btn" id="shareBtn">🔗 Поделиться</button>
         </div>
 
         <!-- Закладка -->
         <div class="bookmark"></div>
+    </div>
+
+    <!-- Модальное окно для ID книги -->
+    <div id="bookIdModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2 class="modal-title">📖 ID вашей книги</h2>
+            <input type="text" id="bookIdInput" class="modal-input" placeholder="Введите ID книги">
+            <div class="modal-buttons">
+                <button class="modal-btn" id="modalCancelBtn">Отмена</button>
+                <button class="modal-btn" id="modalConfirmBtn">Загрузить</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -288,13 +383,14 @@
             constructor() {
                 this.totalPages = 100;
                 this.currentPage = 1;
-                
+                this.bookId = this.getBookIdFromUrl() || this.generateBookId();
+
                 // Элементы DOM
                 this.writingArea = document.getElementById('writingArea');
                 this.pageNumber = document.getElementById('pageNumber');
                 this.pageInput = document.getElementById('pageInput');
                 this.progressFill = document.getElementById('progressFill');
-                
+
                 // Кнопки
                 this.firstBtn = document.getElementById('firstPageBtn');
                 this.prevBtn = document.getElementById('prevPageBtn');
@@ -306,16 +402,27 @@
                 this.saveFileBtn = document.getElementById('saveFileBtn');
                 this.loadFileBtn = document.getElementById('loadFileBtn');
                 this.shareBtn = document.getElementById('shareBtn');
-                
+
                 // Хранилище заметок
                 this.notes = this.loadNotes();
-                
+
                 this.init();
+            }
+
+            // Получить ID из URL (если есть)
+            getBookIdFromUrl() {
+                const urlParams = new URLSearchParams(window.location.search);
+                return urlParams.get('id');
+            }
+
+            // Генерация уникального ID
+            generateBookId() {
+                return 'book_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
             }
 
             // Загрузка из localStorage
             loadNotes() {
-                const savedNotes = localStorage.getItem('simpleBook');
+                const savedNotes = localStorage.getItem('book_' + this.bookId);
                 if (savedNotes) {
                     try {
                         return JSON.parse(savedNotes);
@@ -328,7 +435,7 @@
 
             // Сохранение в localStorage
             saveNotes() {
-                localStorage.setItem('simpleBook', JSON.stringify(this.notes));
+                localStorage.setItem('book_' + this.bookId, JSON.stringify(this.notes));
             }
 
             // Сохранение текущей страницы
@@ -346,10 +453,10 @@
                 if (index >= 0 && index < this.totalPages) {
                     this.writingArea.innerHTML = this.notes[index] || '';
                 }
-                
+
                 this.pageNumber.textContent = `Страница ${this.currentPage}`;
                 this.pageInput.value = this.currentPage;
-                
+
                 if (this.currentPage === 1) {
                     this.writingArea.setAttribute('placeholder', '📖 Первая страница...');
                 } else if (this.currentPage === this.totalPages) {
@@ -460,20 +567,21 @@
             saveToFile() {
                 const data = {
                     notes: this.notes,
+                    id: this.bookId,
                     version: '1.0',
                     date: new Date().toISOString()
                 };
-                
+
                 const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `book-backup-${new Date().toISOString().slice(0,10)}.json`;
+                a.download = `book-${this.bookId}-${new Date().toISOString().slice(0, 10)}.json`;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-                
+
                 alert('✅ Книга сохранена в файл!');
             }
 
@@ -482,11 +590,11 @@
                 const input = document.createElement('input');
                 input.type = 'file';
                 input.accept = '.json';
-                
+
                 input.onchange = (e) => {
                     const file = e.target.files[0];
                     const reader = new FileReader();
-                    
+
                     reader.onload = (event) => {
                         try {
                             const data = JSON.parse(event.target.result);
@@ -495,12 +603,12 @@
                                 if (data.notes.length !== this.totalPages) {
                                     alert(`⚠️ В файле ${data.notes.length} страниц, а нужно ${this.totalPages}. Некоторые страницы могут не загрузиться.`);
                                 }
-                                
+
                                 // Копируем столько страниц, сколько есть
                                 for (let i = 0; i < Math.min(data.notes.length, this.totalPages); i++) {
                                     this.notes[i] = data.notes[i];
                                 }
-                                
+
                                 this.saveNotes();
                                 this.loadPage();
                                 this.updateProgress();
@@ -512,76 +620,53 @@
                             alert('❌ Ошибка при чтении файла');
                         }
                     };
-                    
+
                     reader.readAsText(file);
                 };
-                
+
                 input.click();
             }
 
-            // Скопировать ссылку
+            // Скопировать короткую ссылку
             shareBook() {
-                // Сохраняем текущую страницу перед созданием ссылки
+                // Сохраняем текущую страницу
                 this.saveCurrentPage();
-                
-                // Создаем данные для ссылки
-                const data = {
-                    notes: this.notes,
-                    version: '1.0'
-                };
-                
-                // Кодируем данные
-                const jsonStr = JSON.stringify(data);
-                const compressed = btoa(encodeURIComponent(jsonStr));
-                
-                // Создаем ссылку
-                const url = window.location.href.split('?')[0] + '?data=' + compressed;
-                
+
+                // Создаем короткую ссылку только с ID
+                const url = window.location.href.split('?')[0] + '?id=' + this.bookId;
+
                 // Копируем в буфер обмена
                 navigator.clipboard.writeText(url).then(() => {
-                    alert(`✅ Ссылка скопирована!\n\nТеперь любой может открыть вашу книгу по этой ссылке.`);
+                    alert(`✅ Короткая ссылка скопирована!\n\nID книги: ${this.bookId}\n\nТеперь любой может открыть вашу книгу по этой ссылке.`);
                 }).catch(() => {
                     // Если не удалось скопировать, показываем ссылку
                     prompt('Скопируйте ссылку вручную:', url);
                 });
             }
 
-            // Проверка ссылки с данными
-            checkUrlForData() {
+            // Проверка ссылки с ID
+            checkUrlForId() {
                 const urlParams = new URLSearchParams(window.location.search);
-                const dataParam = urlParams.get('data');
-                
-                if (dataParam) {
-                    try {
-                        const jsonStr = decodeURIComponent(atob(dataParam));
-                        const data = JSON.parse(jsonStr);
-                        
-                        if (data.notes && Array.isArray(data.notes)) {
-                            if (confirm('📖 Загрузить книгу из ссылки? Текущая книга будет заменена.')) {
-                                // Копируем столько страниц, сколько есть
-                                for (let i = 0; i < Math.min(data.notes.length, this.totalPages); i++) {
-                                    this.notes[i] = data.notes[i];
-                                }
-                                
-                                this.saveNotes();
-                                this.loadPage();
-                                this.updateProgress();
-                                alert('✅ Книга загружена из ссылки!');
-                            }
-                        }
-                    } catch (err) {
-                        console.log('Не удалось загрузить данные из ссылки');
+                const id = urlParams.get('id');
+
+                if (id && id !== this.bookId) {
+                    if (confirm(`📖 Загрузить книгу с ID: ${id}? Текущая книга будет заменена.`)) {
+                        this.bookId = id;
+                        this.notes = this.loadNotes();
+                        this.loadPage();
+                        this.updateProgress();
+                        alert('✅ Книга загружена!');
                     }
                 }
             }
 
             // Инициализация
             init() {
+                this.checkUrlForId();
                 this.loadPage();
                 this.updateButtons();
                 this.updateProgress();
                 this.attachEventListeners();
-                this.checkUrlForData();
             }
 
             // Привязка событий
@@ -614,15 +699,15 @@
                 this.clearBtn.addEventListener('click', () => this.clearCurrentPage());
                 this.resetAllBtn.addEventListener('click', () => this.resetAllPages());
                 this.pastePlainBtn.addEventListener('click', () => this.pasteAsPlainText());
-                
-                // Новые функции
+
+                // Обновленные функции
                 this.saveFileBtn.addEventListener('click', () => this.saveToFile());
                 this.loadFileBtn.addEventListener('click', () => this.loadFromFile());
                 this.shareBtn.addEventListener('click', () => this.shareBook());
 
                 document.addEventListener('keydown', (e) => {
                     if (e.target === this.writingArea) return;
-                    
+
                     if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
                         e.preventDefault();
                         this.nextPage();
@@ -650,4 +735,5 @@
         });
     </script>
 </body>
+
 </html>
