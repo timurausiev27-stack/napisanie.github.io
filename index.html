@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📚 Книги с передачей данных</title>
+    <title>📚 Книги с удалением</title>
     <style>
         * {
             margin: 0;
@@ -95,19 +95,49 @@
             flex-wrap: wrap;
         }
 
+        .books-list {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
         .book-tab {
             background: rgba(184, 124, 75, 0.3);
             border: 1px solid #b87c4b;
             border-radius: 30px;
-            padding: 8px 20px;
+            padding: 8px 15px;
             color: #d4af37;
             cursor: pointer;
             font-family: 'Georgia', serif;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .book-tab.active {
             background: #d4af37;
             color: #2c1810;
+        }
+
+        .delete-book {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(196, 75, 75, 0.3);
+            color: #c44b4b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .delete-book:hover {
+            background: #c44b4b;
+            color: white;
+            transform: scale(1.1);
         }
 
         .action-buttons {
@@ -128,11 +158,23 @@
             cursor: pointer;
             font-family: 'Georgia', serif;
             font-weight: bold;
+            transition: all 0.2s;
         }
 
         .action-btn:hover {
             background: #e5c158;
             transform: scale(1.05);
+        }
+
+        .action-btn.danger {
+            background: rgba(196, 75, 75, 0.3);
+            border-color: #c44b4b;
+            color: #c44b4b;
+        }
+
+        .action-btn.danger:hover {
+            background: #c44b4b;
+            color: white;
         }
 
         .bookmark {
@@ -146,6 +188,17 @@
             z-index: 30;
         }
 
+        .bookmark::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 5px;
+            width: 20px;
+            height: 20px;
+            background: #c44b4b;
+            clip-path: polygon(0 0, 100% 0, 50% 100%);
+        }
+
         .status {
             text-align: center;
             margin-top: 15px;
@@ -157,11 +210,13 @@
 </head>
 <body>
     <div class="book-container">
-        <div class="books-panel" id="booksPanel">
-            <span style="color: #d4af37;">📚 Книги:</span>
-            <div id="booksList" style="display: flex; gap: 10px; flex-wrap: wrap;"></div>
+        <!-- Панель книг -->
+        <div class="books-panel">
+            <span style="color: #d4af37;">📚 Мои книги:</span>
+            <div class="books-list" id="booksList"></div>
         </div>
 
+        <!-- Страница -->
         <div class="page">
             <div class="page-header">
                 <span class="book-title" id="currentBookTitle">Книга 1</span>
@@ -171,17 +226,26 @@
             <div id="writingArea" 
                  class="writing-area" 
                  contenteditable="true"
-                 placeholder="✍️ Пиши...">
+                 placeholder="✍️ Пиши что хочешь...">
             </div>
         </div>
 
+        <!-- Кнопки действий -->
         <div class="action-buttons">
-            <button class="action-btn" id="addBookBtn">➕ Новая</button>
+            <button class="action-btn" id="addBookBtn">➕ Новая книга</button>
+            <button class="action-btn" id="renameBookBtn">✏️ Переименовать</button>
+            <button class="action-btn danger" id="deleteBookBtn">🗑️ Удалить эту книгу</button>
+        </div>
+
+        <div class="action-buttons">
             <button class="action-btn" id="shareBookBtn">🔗 Поделиться этой книгой</button>
             <button class="action-btn" id="shareAllBtn">🔗 Поделиться всеми</button>
         </div>
 
+        <!-- Статус -->
         <div class="status" id="status"></div>
+        
+        <!-- Закладка -->
         <div class="bookmark"></div>
     </div>
 
@@ -224,7 +288,6 @@
                 
                 if (data) {
                     try {
-                        // Декодируем данные из ссылки
                         const jsonStr = decodeURIComponent(atob(data));
                         const loadedData = JSON.parse(jsonStr);
                         
@@ -232,16 +295,14 @@
                             this.books = loadedData.books;
                             this.currentBookId = loadedData.currentBook || Object.keys(this.books)[0];
                             
-                            // Сохраняем в localStorage для будущего использования
                             this.saveToStorage();
-                            
-                            this.showStatus('📖 Книги загружены из ссылки');
                             
                             if (this.currentBookId && this.books[this.currentBookId]) {
                                 this.writingArea.innerHTML = this.books[this.currentBookId].content;
                                 this.currentBookTitle.textContent = this.books[this.currentBookId].title;
                             }
                             
+                            this.showStatus('📖 Книги загружены из ссылки');
                             return true;
                         }
                     } catch (e) {
@@ -279,7 +340,7 @@
 
             // Создать новую книгу
             createNewBook(title) {
-                const id = 'book_' + Date.now();
+                const id = 'book_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
                 this.books[id] = {
                     title: title,
                     content: ''
@@ -305,12 +366,57 @@
                 this.renderBooksList();
             }
 
+            // Удалить книгу
+            deleteCurrentBook() {
+                // Проверяем, не последняя ли это книга
+                if (Object.keys(this.books).length <= 1) {
+                    this.showStatus('❌ Нельзя удалить последнюю книгу');
+                    return;
+                }
+                
+                if (confirm(`Удалить книгу "${this.books[this.currentBookId].title}"?`)) {
+                    // Сохраняем ID удаляемой книги
+                    const deletedId = this.currentBookId;
+                    
+                    // Находим другую книгу для переключения
+                    const bookIds = Object.keys(this.books);
+                    const currentIndex = bookIds.indexOf(deletedId);
+                    const nextIndex = currentIndex > 0 ? currentIndex - 1 : 1;
+                    
+                    // Удаляем книгу
+                    delete this.books[deletedId];
+                    
+                    // Переключаемся на другую книгу
+                    this.currentBookId = bookIds[nextIndex];
+                    
+                    // Загружаем новую книгу
+                    this.writingArea.innerHTML = this.books[this.currentBookId].content;
+                    this.currentBookTitle.textContent = this.books[this.currentBookId].title;
+                    
+                    // Сохраняем изменения
+                    this.saveToStorage();
+                    this.renderBooksList();
+                    
+                    this.showStatus('🗑️ Книга удалена');
+                }
+            }
+
+            // Переименовать книгу
+            renameCurrentBook() {
+                const newTitle = prompt('Новое название книги:', this.books[this.currentBookId].title);
+                if (newTitle && newTitle.trim()) {
+                    this.books[this.currentBookId].title = newTitle.trim();
+                    this.currentBookTitle.textContent = newTitle.trim();
+                    this.saveToStorage();
+                    this.renderBooksList();
+                    this.showStatus('✏️ Книга переименована');
+                }
+            }
+
             // Поделиться одной книгой
             shareCurrentBook() {
-                // Сохраняем текущий текст
                 this.books[this.currentBookId].content = this.writingArea.innerHTML;
                 
-                // Создаем данные только для одной книги
                 const shareData = {
                     books: {
                         [this.currentBookId]: this.books[this.currentBookId]
@@ -318,35 +424,29 @@
                     currentBook: this.currentBookId
                 };
                 
-                this.createShareLink(shareData);
+                this.createShareLink(shareData, 'одной книгой');
             }
 
             // Поделиться всеми книгами
             shareAllBooks() {
-                // Сохраняем текущий текст
                 this.books[this.currentBookId].content = this.writingArea.innerHTML;
                 
-                // Создаем данные для всех книг
                 const shareData = {
                     books: this.books,
                     currentBook: this.currentBookId
                 };
                 
-                this.createShareLink(shareData);
+                this.createShareLink(shareData, 'всеми книгами');
             }
 
             // Создать ссылку
-            createShareLink(data) {
-                // Кодируем данные
+            createShareLink(data, type) {
                 const jsonStr = JSON.stringify(data);
                 const encoded = btoa(encodeURIComponent(jsonStr));
-                
-                // Создаем ссылку
                 const url = window.location.href.split('?')[0] + '?data=' + encoded;
                 
-                // Копируем
                 navigator.clipboard.writeText(url).then(() => {
-                    this.showStatus('✅ Ссылка скопирована!');
+                    this.showStatus(`✅ Ссылка с ${type} скопирована!`);
                 }).catch(() => {
                     prompt('Скопируй ссылку:', url);
                 });
@@ -358,14 +458,45 @@
                 
                 for (let [id, book] of Object.entries(this.books)) {
                     html += `
-                        <div class="book-tab ${id === this.currentBookId ? 'active' : ''}" 
-                             onclick="app.switchBook('${id}')">
-                            ${book.title}
+                        <div class="book-tab ${id === this.currentBookId ? 'active' : ''}">
+                            <span onclick="app.switchBook('${id}')">${book.title}</span>
+                            <span class="delete-book" onclick="app.deleteBook('${id}', event)">✕</span>
                         </div>
                     `;
                 }
                 
                 this.booksList.innerHTML = html;
+            }
+
+            // Удалить книгу по клику на крестик
+            deleteBook(id, event) {
+                event.stopPropagation();
+                
+                if (Object.keys(this.books).length <= 1) {
+                    this.showStatus('❌ Нельзя удалить последнюю книгу');
+                    return;
+                }
+                
+                if (confirm(`Удалить книгу "${this.books[id].title}"?`)) {
+                    // Если удаляем текущую книгу
+                    if (id === this.currentBookId) {
+                        const bookIds = Object.keys(this.books);
+                        const currentIndex = bookIds.indexOf(id);
+                        const nextIndex = currentIndex > 0 ? currentIndex - 1 : 1;
+                        
+                        delete this.books[id];
+                        this.currentBookId = bookIds[nextIndex];
+                        
+                        this.writingArea.innerHTML = this.books[this.currentBookId].content;
+                        this.currentBookTitle.textContent = this.books[this.currentBookId].title;
+                    } else {
+                        delete this.books[id];
+                    }
+                    
+                    this.saveToStorage();
+                    this.renderBooksList();
+                    this.showStatus('🗑️ Книга удалена');
+                }
             }
 
             // Показать статус
@@ -402,9 +533,18 @@
                     this.saveToStorage();
                 });
 
+                // Кнопки
                 document.getElementById('addBookBtn').addEventListener('click', () => {
-                    const title = prompt('Название книги:', 'Новая книга');
+                    const title = prompt('Название новой книги:', 'Новая книга');
                     if (title) this.createNewBook(title);
+                });
+
+                document.getElementById('renameBookBtn').addEventListener('click', () => {
+                    this.renameCurrentBook();
+                });
+
+                document.getElementById('deleteBookBtn').addEventListener('click', () => {
+                    this.deleteCurrentBook();
                 });
 
                 document.getElementById('shareBookBtn').addEventListener('click', () => {
@@ -418,8 +558,9 @@
         }
 
         // Запускаем
-        const app = new BookApp();
-        window.app = app;
+        document.addEventListener('DOMContentLoaded', () => {
+            window.app = new BookApp();
+        });
     </script>
 </body>
 </html>
