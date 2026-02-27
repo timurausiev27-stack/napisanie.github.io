@@ -726,13 +726,23 @@
                 this.exitSearch();
             }
 
-            // Полный выход из поиска
+            // ПОЛНЫЙ выход из поиска (убирает подсветку!)
             exitSearch() {
-                this.hideSearchResults();
+                // Скрываем результаты
+                this.searchResults.classList.remove('show');
                 this.searchNavigation.style.display = 'none';
-                this.clearHighlights();
+                
+                // УБИРАЕМ ВСЮ ПОДСВЕТКУ - сохраняем оригинальный текст без тегов
+                const book = this.books.find(b => b.id === this.currentBookId);
+                if (book) {
+                    // Восстанавливаем оригинальное содержимое
+                    this.writingArea.innerHTML = book.content;
+                }
+                
+                // Очищаем данные поиска
                 this.matches = [];
                 this.currentMatchIndex = -1;
+                
                 this.showStatus('🔍 Поиск завершен');
             }
 
@@ -757,8 +767,8 @@
                 this.matches = [];
                 let match;
 
-                // Очищаем подсветку
-                this.clearHighlights();
+                // ВСЕГДА начинаем с чистого текста (без подсветки)
+                this.writingArea.innerHTML = book.content;
 
                 while ((match = regex.exec(plainText)) !== null) {
                     this.matches.push({
@@ -795,6 +805,9 @@
                 const content = this.writingArea.innerHTML;
                 const regex = new RegExp(`(${searchText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
                 this.writingArea.innerHTML = content.replace(regex, '<span class="highlight">$1</span>');
+                
+                // Сохраняем подсвеченную версию в книгу? НЕТ! Не сохраняем, иначе подсветка останется навсегда
+                // Мы не обновляем book.content, значит подсветка только временная
             }
 
             // Подсветка текущего выбранного совпадения
@@ -817,10 +830,13 @@
                 }
             }
 
-            // Очистка подсветки
+            // Очистка подсветки (теперь не нужна, но оставим для совместимости)
             clearHighlights() {
-                const content = this.writingArea.innerHTML;
-                this.writingArea.innerHTML = content.replace(/<span class="highlight">(.*?)<\/span>/g, '$1');
+                // Просто восстанавливаем оригинальное содержимое книги
+                const book = this.books.find(b => b.id === this.currentBookId);
+                if (book) {
+                    this.writingArea.innerHTML = book.content;
+                }
             }
 
             // Показать список результатов
@@ -838,7 +854,7 @@
                     const end = Math.min(plainText.length, match.index + match.length + 30);
                     let preview = plainText.substring(start, end);
                     
-                    // Выделяем найденное слово
+                    // Выделяем найденное слово в превью
                     preview = preview.replace(
                         new RegExp(`(${searchText})`, 'gi'),
                         '<span style="background: #ffeb3b; color: #2c1810; padding: 2px;">$1</span>'
@@ -899,9 +915,9 @@
                 this.matchCounter.textContent = `${this.currentMatchIndex + 1}/${this.matches.length}`;
             }
 
-            // Скрыть результаты поиска
+            // Скрыть результаты поиска (теперь просто вызываем exitSearch)
             hideSearchResults() {
-                this.searchResults.classList.remove('show');
+                this.exitSearch();
             }
 
             // Загрузка настроек шрифта из localStorage
@@ -1131,7 +1147,9 @@
                     this.writingArea.innerHTML = book.content || '';
                     this.currentBookTitle.textContent = book.title;
                     localStorage.setItem('lastBookId', this.currentBookId);
-                    this.exitSearch(); // Выходим из поиска при смене книги
+                    
+                    // ВАЖНО: Выходим из поиска при смене книги
+                    this.exitSearch();
                 }
             }
 
