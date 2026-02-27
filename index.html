@@ -223,12 +223,20 @@
             flex-wrap: wrap;
         }
 
-        .search-input {
+        .search-input-wrapper {
             flex: 1;
-            min-width: 200px;
+            display: flex;
+            align-items: center;
             background: rgba(255, 252, 240, 0.9);
             border: 2px solid #b87c4b;
             border-radius: 30px;
+            padding: 2px;
+        }
+
+        .search-input {
+            flex: 1;
+            background: transparent;
+            border: none;
             padding: 12px 20px;
             font-family: 'Georgia', serif;
             font-size: 16px;
@@ -236,9 +244,24 @@
             outline: none;
         }
 
-        .search-input:focus {
-            background: #fffcf0;
-            box-shadow: 0 0 0 3px #d4af37;
+        .clear-search {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(196, 75, 75, 0.2);
+            color: #c44b4b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+            margin-right: 5px;
+            transition: all 0.2s;
+        }
+
+        .clear-search:hover {
+            background: #c44b4b;
+            color: white;
         }
 
         .search-btn {
@@ -590,7 +613,10 @@
 
         <!-- Панель поиска -->
         <div class="search-panel">
-            <input type="text" id="searchInput" class="search-input" placeholder="🔍 Найти слово в этой книге...">
+            <div class="search-input-wrapper">
+                <input type="text" id="searchInput" class="search-input" placeholder="🔍 Найти слово в этой книге...">
+                <div class="clear-search" id="clearSearch" title="Очистить поиск">✕</div>
+            </div>
             <button class="search-btn" id="searchBtn">Найти</button>
             <div class="search-navigation" id="searchNavigation" style="display: none;">
                 <div class="nav-arrow" id="prevMatch">←</div>
@@ -604,7 +630,7 @@
             <div class="search-header">
                 <span id="searchResultsTitle">Результаты поиска</span>
                 <span class="search-stats" id="searchStats"></span>
-                <span class="close-search" id="closeSearch">✕</span>
+                <span class="close-search" id="closeSearch" title="Закрыть результаты">✕</span>
             </div>
             <div id="searchResultsList"></div>
         </div>
@@ -650,6 +676,7 @@
                 this.searchResults = document.getElementById('searchResults');
                 this.searchResultsList = document.getElementById('searchResultsList');
                 this.closeSearch = document.getElementById('closeSearch');
+                this.clearSearch = document.getElementById('clearSearch');
                 this.searchNavigation = document.getElementById('searchNavigation');
                 this.matchCounter = document.getElementById('matchCounter');
                 this.prevMatch = document.getElementById('prevMatch');
@@ -679,7 +706,10 @@
                 this.searchInput.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') this.searchInBook();
                 });
-                this.closeSearch.addEventListener('click', () => this.hideSearchResults());
+                
+                // Очистка и закрытие
+                this.closeSearch.addEventListener('click', () => this.exitSearch());
+                this.clearSearch.addEventListener('click', () => this.clearSearchInput());
                 
                 // Навигация по результатам
                 this.prevMatch.addEventListener('click', () => this.navigateMatches('prev'));
@@ -687,6 +717,23 @@
                 
                 // Назначаем обработчики для кнопок шрифта
                 this.setupFontButtons();
+            }
+
+            // Очистить поле поиска
+            clearSearchInput() {
+                this.searchInput.value = '';
+                this.searchInput.focus();
+                this.exitSearch();
+            }
+
+            // Полный выход из поиска
+            exitSearch() {
+                this.hideSearchResults();
+                this.searchNavigation.style.display = 'none';
+                this.clearHighlights();
+                this.matches = [];
+                this.currentMatchIndex = -1;
+                this.showStatus('🔍 Поиск завершен');
             }
 
             // Поиск в текущей книге
@@ -723,7 +770,7 @@
 
                 if (this.matches.length === 0) {
                     this.showStatus('🔍 Ничего не найдено');
-                    this.hideSearchResults();
+                    this.exitSearch();
                     return;
                 }
 
@@ -855,10 +902,6 @@
             // Скрыть результаты поиска
             hideSearchResults() {
                 this.searchResults.classList.remove('show');
-                this.searchNavigation.style.display = 'none';
-                this.clearHighlights();
-                this.matches = [];
-                this.currentMatchIndex = -1;
             }
 
             // Загрузка настроек шрифта из localStorage
@@ -1088,7 +1131,7 @@
                     this.writingArea.innerHTML = book.content || '';
                     this.currentBookTitle.textContent = book.title;
                     localStorage.setItem('lastBookId', this.currentBookId);
-                    this.hideSearchResults(); // Скрываем результаты при смене книги
+                    this.exitSearch(); // Выходим из поиска при смене книги
                 }
             }
 
