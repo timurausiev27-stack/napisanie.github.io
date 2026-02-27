@@ -2,8 +2,8 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>📚 Книга на весь экран</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📚 Книга с полноэкранным режимом</title>
     
     <!-- Для установки на ПК -->
     <link rel="manifest" href="manifest.json">
@@ -19,58 +19,64 @@
             box-sizing: border-box;
         }
 
-        html, body {
-            width: 100%;
-            height: 100%;
-            overflow: hidden; /* Убираем прокрутку у body */
-        }
-
         body {
             background: linear-gradient(145deg, #2b4b3c 0%, #1d352a 100%);
-            font-family: 'Courier New', 'Georgia', serif;
-            padding: 10px;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
+            font-family: 'Courier New', 'Georgia', serif;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        /* Полноэкранный режим */
+        body.fullscreen {
+            padding: 0;
+            background: #1d352a;
+        }
+
+        body.fullscreen .book-container {
+            max-width: 100%;
+            height: 100vh;
+            margin: 0;
+            border-radius: 0;
+        }
+
+        body.fullscreen .page {
+            border-radius: 0;
+            box-shadow: none;
+            border: none;
+            border-left: 2px solid #b87c4b;
+            border-right: 2px solid #b87c4b;
+        }
+
+        body.fullscreen .books-panel,
+        body.fullscreen .search-panel,
+        body.fullscreen .action-buttons,
+        body.fullscreen .status,
+        body.fullscreen .bookmark,
+        body.fullscreen .toggle-font-panel,
+        body.fullscreen .install-btn,
+        body.fullscreen .offline-badge {
+            border-radius: 0;
         }
 
         .book-container {
-            width: 100%;
-            height: 100%;
-            max-width: 1400px; /* Максимальная ширина для больших экранов */
-            margin: 0 auto;
+            width: 1000px;
+            max-width: 100%;
             position: relative;
-            display: flex;
-            flex-direction: column;
+            transition: all 0.3s ease;
         }
 
-        /* Кнопка установки */
-        .install-btn {
+        /* Кнопка полноэкранного режима */
+        .fullscreen-btn {
             position: fixed;
-            top: 15px;
-            right: 15px;
+            top: 20px;
+            left: 20px;
             background: #d4af37;
             border: 2px solid #b87c4b;
             border-radius: 30px;
-            padding: 10px 20px;
-            color: #2c1810;
-            cursor: pointer;
-            font-family: 'Georgia', serif;
-            font-weight: bold;
-            display: none;
-            z-index: 2000;
-            font-size: 14px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-
-        /* Кнопка для показа/скрытия панели шрифтов */
-        .toggle-font-panel {
-            position: fixed;
-            bottom: 15px;
-            right: 15px;
-            background: #d4af37;
-            border: 2px solid #b87c4b;
-            border-radius: 50px;
             padding: 12px 20px;
             color: #2c1810;
             cursor: pointer;
@@ -78,6 +84,52 @@
             font-weight: bold;
             z-index: 2000;
             font-size: 14px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s;
+        }
+
+        .fullscreen-btn:hover {
+            background: #e5c158;
+            transform: scale(1.05);
+        }
+
+        /* Кнопка установки */
+        .install-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #d4af37;
+            border: 2px solid #b87c4b;
+            border-radius: 30px;
+            padding: 12px 25px;
+            color: #2c1810;
+            cursor: pointer;
+            font-family: 'Georgia', serif;
+            font-weight: bold;
+            display: none;
+            z-index: 2000;
+            font-size: 16px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        /* Кнопка для показа/скрытия панели шрифтов */
+        .toggle-font-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #d4af37;
+            border: 2px solid #b87c4b;
+            border-radius: 50px;
+            padding: 15px 25px;
+            color: #2c1810;
+            cursor: pointer;
+            font-family: 'Georgia', serif;
+            font-weight: bold;
+            z-index: 2000;
+            font-size: 16px;
             box-shadow: 0 5px 20px rgba(0,0,0,0.5);
             transition: all 0.3s;
         }
@@ -85,19 +137,19 @@
         /* Панель управления шрифтом */
         .font-panel {
             position: fixed;
-            bottom: 80px;
-            right: 15px;
-            background: rgba(44, 24, 16, 0.98);
+            bottom: 90px;
+            right: 20px;
+            background: rgba(44, 24, 16, 0.95);
             border: 2px solid #b87c4b;
-            border-radius: 30px;
-            padding: 15px;
+            border-radius: 50px;
+            padding: 15px 25px;
             display: none;
-            gap: 10px;
+            gap: 15px;
             flex-wrap: wrap;
             z-index: 2000;
             backdrop-filter: blur(5px);
             box-shadow: 0 5px 20px rgba(0,0,0,0.5);
-            max-width: 95vw;
+            max-width: 90vw;
         }
 
         .font-panel.show {
@@ -111,19 +163,19 @@
             flex-wrap: wrap;
         }
 
-        .font-btn, .size-btn {
+        .font-btn {
             background: rgba(184, 124, 75, 0.3);
             border: 1px solid #b87c4b;
             border-radius: 30px;
-            padding: 6px 12px;
+            padding: 8px 15px;
             color: #d4af37;
             cursor: pointer;
             font-family: 'Georgia', serif;
             transition: all 0.2s;
-            font-size: 12px;
+            font-size: 14px;
         }
 
-        .font-btn:hover, .size-btn:hover {
+        .font-btn:hover {
             background: rgba(184, 124, 75, 0.5);
         }
 
@@ -133,8 +185,19 @@
         }
 
         .size-btn {
-            min-width: 35px;
+            background: rgba(184, 124, 75, 0.3);
+            border: 1px solid #b87c4b;
+            border-radius: 30px;
+            padding: 8px 15px;
+            color: #d4af37;
+            cursor: pointer;
+            font-family: 'Georgia', serif;
+            min-width: 40px;
             text-align: center;
+        }
+
+        .size-btn:hover {
+            background: rgba(184, 124, 75, 0.5);
         }
 
         .separator {
@@ -145,53 +208,44 @@
 
         /* Панель с книгами */
         .books-panel {
-            background: rgba(44, 24, 16, 0.98);
+            background: rgba(44, 24, 16, 0.95);
             border: 2px solid #b87c4b;
-            border-radius: 40px;
-            padding: 10px 15px;
-            margin-bottom: 10px;
+            border-radius: 60px;
+            padding: 15px 25px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 15px;
             flex-wrap: wrap;
-            flex-shrink: 0;
-        }
-
-        .books-panel span {
-            color: #d4af37;
-            font-size: 14px;
-            white-space: nowrap;
         }
 
         .books-list {
             display: flex;
-            gap: 8px;
+            gap: 10px;
             flex-wrap: wrap;
             align-items: center;
-            max-height: 80px;
+            max-height: 200px;
             overflow-y: auto;
-            padding: 3px;
-            flex: 1;
+            padding: 5px;
         }
 
         .book-tab {
             background: rgba(184, 124, 75, 0.3);
             border: 1px solid #b87c4b;
             border-radius: 30px;
-            padding: 5px 12px;
+            padding: 8px 15px;
             color: #d4af37;
             cursor: pointer;
             font-family: 'Georgia', serif;
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 8px;
             transition: all 0.2s;
-            font-size: 13px;
-            white-space: nowrap;
         }
 
         .book-tab:hover {
             background: rgba(184, 124, 75, 0.5);
+            transform: scale(1.02);
         }
 
         .book-tab.active {
@@ -200,15 +254,15 @@
         }
 
         .delete-book {
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
             background: rgba(196, 75, 75, 0.3);
             color: #c44b4b;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
+            font-size: 14px;
             cursor: pointer;
         }
 
@@ -219,24 +273,22 @@
 
         /* Панель поиска */
         .search-panel {
-            background: rgba(44, 24, 16, 0.98);
+            background: rgba(44, 24, 16, 0.95);
             border: 2px solid #b87c4b;
-            border-radius: 40px;
-            padding: 8px 15px;
-            margin-bottom: 10px;
+            border-radius: 60px;
+            padding: 10px 20px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
             gap: 10px;
             flex-wrap: wrap;
-            flex-shrink: 0;
         }
 
         .search-input-wrapper {
             flex: 1;
-            min-width: 150px;
             display: flex;
             align-items: center;
-            background: rgba(255, 252, 240, 0.95);
+            background: rgba(255, 252, 240, 0.9);
             border: 2px solid #b87c4b;
             border-radius: 30px;
             padding: 2px;
@@ -246,16 +298,16 @@
             flex: 1;
             background: transparent;
             border: none;
-            padding: 8px 15px;
+            padding: 12px 20px;
             font-family: 'Georgia', serif;
-            font-size: 14px;
+            font-size: 16px;
             color: #2c1810;
             outline: none;
         }
 
         .clear-search {
-            width: 30px;
-            height: 30px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             background: rgba(196, 75, 75, 0.2);
             color: #c44b4b;
@@ -263,8 +315,9 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 18px;
             margin-right: 5px;
+            transition: all 0.2s;
         }
 
         .clear-search:hover {
@@ -276,59 +329,105 @@
             background: #d4af37;
             border: 2px solid #b87c4b;
             border-radius: 30px;
-            padding: 8px 15px;
+            padding: 10px 20px;
             color: #2c1810;
             cursor: pointer;
             font-family: 'Georgia', serif;
             font-weight: bold;
-            font-size: 14px;
-            white-space: nowrap;
+            transition: all 0.2s;
         }
 
         .search-btn:hover {
             background: #e5c158;
+            transform: scale(1.05);
         }
 
         /* Результаты поиска */
         .search-results {
-            background: rgba(44, 24, 16, 0.98);
+            background: rgba(44, 24, 16, 0.95);
             border: 2px solid #b87c4b;
-            border-radius: 20px;
-            padding: 10px;
-            margin-bottom: 10px;
+            border-radius: 30px;
+            padding: 15px;
+            margin-bottom: 20px;
             color: #d4af37;
             font-family: 'Georgia', serif;
-            max-height: 200px;
+            max-height: 300px;
             overflow-y: auto;
             display: none;
-            flex-shrink: 0;
         }
 
         .search-results.show {
             display: block;
         }
 
+        .search-result-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            margin: 5px 0;
+            background: rgba(184, 124, 75, 0.2);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 4px solid #d4af37;
+        }
+
+        .search-result-item:hover {
+            background: rgba(184, 124, 75, 0.4);
+            transform: translateX(5px);
+        }
+
+        .search-result-number {
+            width: 30px;
+            height: 30px;
+            background: #d4af37;
+            color: #2c1810;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .search-result-preview {
+            color: #fffcf0;
+            font-size: 14px;
+            margin: 5px 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .search-result-location {
+            color: #b87c4b;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
         .search-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
-            padding-bottom: 5px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
             border-bottom: 1px solid #b87c4b;
-            font-size: 13px;
         }
 
         .search-stats {
-            font-size: 12px;
+            font-size: 14px;
             color: #b87c4b;
         }
 
         .close-search {
             cursor: pointer;
             color: #c44b4b;
-            font-size: 16px;
-            width: 24px;
-            height: 24px;
+            font-size: 20px;
+            width: 30px;
+            height: 30px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -336,65 +435,22 @@
             background: rgba(196, 75, 75, 0.2);
         }
 
-        .search-result-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px;
-            margin: 3px 0;
-            background: rgba(184, 124, 75, 0.2);
-            border-radius: 12px;
-            cursor: pointer;
-            border-left: 3px solid #d4af37;
-            font-size: 12px;
+        .close-search:hover {
+            background: #c44b4b;
+            color: white;
         }
 
-        .search-result-item:hover {
-            background: rgba(184, 124, 75, 0.4);
-        }
-
-        .search-result-number {
-            width: 22px;
-            height: 22px;
-            background: #d4af37;
-            color: #2c1810;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 11px;
-        }
-
-        .search-result-preview {
-            color: #fffcf0;
-            font-size: 12px;
-            margin: 3px 0;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 300px;
-        }
-
-        .search-result-location {
-            color: #b87c4b;
-            font-size: 10px;
-            display: flex;
-            align-items: center;
-            gap: 3px;
-        }
-
-        /* Навигационные кнопки */
+        /* Навигационные кнопки поиска */
         .search-navigation {
             display: flex;
-            gap: 8px;
+            gap: 10px;
             align-items: center;
             margin-left: auto;
         }
 
         .nav-arrow {
-            width: 30px;
-            height: 30px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             background: #d4af37;
             color: #2c1810;
@@ -402,66 +458,63 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 20px;
             border: 2px solid #b87c4b;
         }
 
         .nav-arrow:hover {
             background: #e5c158;
+            transform: scale(1.05);
         }
 
         #matchCounter {
             color: #d4af37;
-            font-size: 13px;
-            min-width: 40px;
+            font-size: 14px;
+            min-width: 50px;
             text-align: center;
         }
 
-        /* Страница - занимает всё оставшееся место */
         .page {
-            flex: 1;
-            min-height: 0; /* Важно для flex-контейнера */
             width: 100%;
+            height: 600px;
+            max-height: 60vh;
             background: #fffcf0;
             border-radius: 20px;
             box-shadow: 
-                0 10px 30px rgba(0, 0, 0, 0.6),
+                0 20px 40px rgba(0, 0, 0, 0.6),
                 0 0 0 2px #b87c4b,
-                0 0 0 5px #5d3a1a;
-            padding: 20px 25px;
+                0 0 0 6px #5d3a1a;
+            padding: 40px 50px;
             position: relative;
             overflow-y: auto;
             font-family: 'Courier New', 'Georgia', serif;
-            font-size: 16px;
+            font-size: 18px;
             color: #3b2b1a;
-            line-height: 1.6;
+            line-height: 1.8;
             transition: all 0.2s;
-            margin-bottom: 10px;
         }
 
         .page-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 8px;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
             border-bottom: 2px solid #d4b99b;
             font-family: 'Georgia', serif;
             font-style: italic;
             color: #8b6b4f;
-            font-size: 16px;
-            flex-shrink: 0;
         }
 
         .book-title {
             font-weight: bold;
             color: #6b4a2c;
-            font-size: 18px;
+            font-size: 20px;
         }
 
         .writing-area {
             width: 100%;
-            height: calc(100% - 50px);
+            min-height: calc(100% - 100px);
             outline: none;
             white-space: pre-wrap;
             word-wrap: break-word;
@@ -469,7 +522,6 @@
             font-size: inherit;
             line-height: inherit;
             color: inherit;
-            overflow-y: auto;
         }
 
         .writing-area:empty:before {
@@ -481,73 +533,72 @@
 
         .action-buttons {
             display: flex;
-            gap: 8px;
+            gap: 10px;
+            margin-top: 20px;
             justify-content: center;
             flex-wrap: wrap;
-            flex-shrink: 0;
         }
 
         .action-btn {
             background: #d4af37;
             border: 2px solid #b87c4b;
             border-radius: 30px;
-            padding: 6px 15px;
-            font-size: 13px;
+            padding: 10px 25px;
+            font-size: 16px;
             color: #2c1810;
             cursor: pointer;
             font-family: 'Georgia', serif;
             font-weight: bold;
             transition: all 0.2s;
-            white-space: nowrap;
         }
 
         .action-btn:hover {
             background: #e5c158;
+            transform: scale(1.05);
         }
 
         .status {
             text-align: center;
-            margin-top: 8px;
+            margin-top: 15px;
             color: #d4af37;
-            font-size: 12px;
-            min-height: 18px;
-            flex-shrink: 0;
+            font-size: 14px;
+            min-height: 20px;
         }
 
         .bookmark {
             position: absolute;
-            top: -3px;
-            right: 20px;
-            width: 20px;
-            height: 50px;
+            top: -5px;
+            right: 30px;
+            width: 30px;
+            height: 70px;
             background: #c44b4b;
-            border-radius: 0 0 8px 8px;
-            z-index: 100;
+            border-radius: 0 0 10px 10px;
+            z-index: 30;
         }
 
         .bookmark::after {
             content: '';
             position: absolute;
-            bottom: -8px;
-            left: 3px;
-            width: 14px;
-            height: 14px;
+            bottom: -12px;
+            left: 5px;
+            width: 20px;
+            height: 20px;
             background: #c44b4b;
             clip-path: polygon(0 0, 100% 0, 50% 100%);
         }
 
         .offline-badge {
             position: fixed;
-            bottom: 15px;
-            left: 15px;
+            bottom: 20px;
+            left: 20px;
             background: #c44b4b;
             color: white;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 11px;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-size: 14px;
             display: none;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.3);
-            z-index: 2000;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 1000;
         }
 
         .offline-badge.show {
@@ -558,7 +609,7 @@
             background-color: #ffeb3b;
             color: #2c1810 !important;
             padding: 2px;
-            border-radius: 2px;
+            border-radius: 3px;
             font-weight: bold;
         }
 
@@ -566,55 +617,19 @@
             background-color: #ff9800 !important;
             color: #2c1810 !important;
             padding: 2px;
-            border-radius: 2px;
+            border-radius: 3px;
             font-weight: bold;
             box-shadow: 0 0 0 2px #ff5722;
-        }
-
-        /* Адаптация для маленьких экранов */
-        @media (max-width: 700px) {
-            body {
-                padding: 5px;
-            }
-            
-            .books-panel span {
-                font-size: 12px;
-            }
-            
-            .book-tab {
-                padding: 4px 8px;
-                font-size: 11px;
-            }
-            
-            .action-btn {
-                padding: 4px 10px;
-                font-size: 11px;
-            }
-            
-            .page {
-                padding: 15px;
-            }
-            
-            .book-title {
-                font-size: 16px;
-            }
-            
-            .toggle-font-panel {
-                padding: 8px 15px;
-                font-size: 12px;
-                bottom: 10px;
-                right: 10px;
-            }
-            
-            .font-panel {
-                bottom: 70px;
-                right: 10px;
-                padding: 10px;
-            }
         }
     </style>
 </head>
 <body>
+    <!-- Кнопка полноэкранного режима -->
+    <button class="fullscreen-btn" id="fullscreenBtn">
+        <span id="fullscreenIcon">⛶</span>
+        <span id="fullscreenText">На весь экран</span>
+    </button>
+
     <button class="install-btn" id="installBtn">📥 Установить на ПК</button>
     <div class="offline-badge" id="offlineBadge">📴 Работает без интернета</div>
 
@@ -634,33 +649,33 @@
         
         <div class="font-group">
             <button class="size-btn" data-size="14">A-</button>
-            <button class="size-btn" data-size="16">A</button>
-            <button class="size-btn" data-size="18">A+</button>
-            <button class="size-btn" data-size="22">A++</button>
+            <button class="size-btn" data-size="18">A</button>
+            <button class="size-btn" data-size="22">A+</button>
+            <button class="size-btn" data-size="26">A++</button>
         </div>
         
         <div class="separator"></div>
         
         <div class="font-group">
-            <button class="size-btn" data-line="1.4">Стр ▼</button>
-            <button class="size-btn" data-line="1.8">Стр •</button>
-            <button class="size-btn" data-line="2.2">Стр ▲</button>
+            <button class="size-btn" data-line="1.4">Строки ▼</button>
+            <button class="size-btn" data-line="1.8">Строки •</button>
+            <button class="size-btn" data-line="2.2">Строки ▲</button>
         </div>
     </div>
 
     <div class="book-container">
         <!-- Панель со всеми книгами -->
         <div class="books-panel">
-            <span>📚 (<span id="bookCount">0</span>):</span>
+            <span style="color: #d4af37;">📚 Мои книги (<span id="bookCount">0</span>):</span>
             <div class="books-list" id="booksList"></div>
-            <button class="action-btn" id="addFromLinkBtn" style="padding: 4px 10px;">➕ По ссылке</button>
+            <button class="action-btn" id="addFromLinkBtn" style="padding: 5px 15px;">➕ Добавить по ссылке</button>
         </div>
 
         <!-- Панель поиска -->
         <div class="search-panel">
             <div class="search-input-wrapper">
-                <input type="text" id="searchInput" class="search-input" placeholder="🔍 Найти...">
-                <div class="clear-search" id="clearSearch" title="Очистить">✕</div>
+                <input type="text" id="searchInput" class="search-input" placeholder="🔍 Найти слово в этой книге...">
+                <div class="clear-search" id="clearSearch" title="Очистить поиск">✕</div>
             </div>
             <button class="search-btn" id="searchBtn">Найти</button>
             <div class="search-navigation" id="searchNavigation" style="display: none;">
@@ -673,14 +688,14 @@
         <!-- Результаты поиска -->
         <div class="search-results" id="searchResults">
             <div class="search-header">
-                <span>Результаты</span>
+                <span id="searchResultsTitle">Результаты поиска</span>
                 <span class="search-stats" id="searchStats"></span>
-                <span class="close-search" id="closeSearch" title="Закрыть">✕</span>
+                <span class="close-search" id="closeSearch" title="Закрыть результаты">✕</span>
             </div>
             <div id="searchResultsList"></div>
         </div>
 
-        <!-- Страница на весь экран -->
+        <!-- Страница -->
         <div class="page" id="page">
             <div class="page-header">
                 <span class="book-title" id="currentBookTitle">Книга 1</span>
@@ -728,6 +743,11 @@
                 this.nextMatch = document.getElementById('nextMatch');
                 this.searchStats = document.getElementById('searchStats');
                 
+                // Кнопка полноэкранного режима
+                this.fullscreenBtn = document.getElementById('fullscreenBtn');
+                this.fullscreenIcon = document.getElementById('fullscreenIcon');
+                this.fullscreenText = document.getElementById('fullscreenText');
+                
                 // Данные для поиска
                 this.matches = [];
                 this.currentMatchIndex = -1;
@@ -760,8 +780,26 @@
                 this.prevMatch.addEventListener('click', () => this.navigateMatches('prev'));
                 this.nextMatch.addEventListener('click', () => this.navigateMatches('next'));
                 
+                // Полноэкранный режим
+                this.fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
+                
                 // Назначаем обработчики для кнопок шрифта
                 this.setupFontButtons();
+            }
+
+            // Переключение полноэкранного режима
+            toggleFullscreen() {
+                document.body.classList.toggle('fullscreen');
+                
+                if (document.body.classList.contains('fullscreen')) {
+                    this.fullscreenIcon.textContent = '✕';
+                    this.fullscreenText.textContent = 'Выйти';
+                } else {
+                    this.fullscreenIcon.textContent = '⛶';
+                    this.fullscreenText.textContent = 'На весь экран';
+                }
+                
+                this.showStatus(document.body.classList.contains('fullscreen') ? '📺 Полноэкранный режим' : '📺 Обычный режим');
             }
 
             // Очистить поле поиска
@@ -790,7 +828,7 @@
             searchInBook() {
                 const searchText = this.searchInput.value.trim();
                 if (!searchText) {
-                    this.showStatus('❌ Введите слово');
+                    this.showStatus('❌ Введите слово для поиска');
                     return;
                 }
 
@@ -863,8 +901,8 @@
                     tempDiv.innerHTML = book.content;
                     const plainText = tempDiv.textContent || tempDiv.innerText || '';
                     
-                    const start = Math.max(0, match.index - 20);
-                    const end = Math.min(plainText.length, match.index + match.length + 20);
+                    const start = Math.max(0, match.index - 30);
+                    const end = Math.min(plainText.length, match.index + match.length + 30);
                     let preview = plainText.substring(start, end);
                     
                     preview = preview.replace(
@@ -880,7 +918,7 @@
                             <div class="search-result-content">
                                 <div class="search-result-preview">${preview}</div>
                                 <div class="search-result-location">
-                                    <span>📍 ${lineNumber}</span>
+                                    <span>📍 Строка ${lineNumber}</span>
                                     <span class="search-result-arrow">→</span>
                                 </div>
                             </div>
@@ -924,8 +962,8 @@
 
             loadFontSettings() {
                 const savedFont = localStorage.getItem('fontStyle') || 'default';
-                const savedSize = localStorage.getItem('fontSize') || '16';
-                const savedLine = localStorage.getItem('lineHeight') || '1.6';
+                const savedSize = localStorage.getItem('fontSize') || '18';
+                const savedLine = localStorage.getItem('lineHeight') || '1.8';
                 
                 this.applyFont(savedFont);
                 this.page.style.fontSize = savedSize + 'px';
@@ -997,7 +1035,7 @@
                     btn.textContent = '✎ Настройки шрифта';
                 } else {
                     panel.classList.add('show');
-                    btn.textContent = '✕ Закрыть';
+                    btn.textContent = '✕ Закрыть настройки';
                 }
             }
 
@@ -1162,7 +1200,7 @@
                 this.saveBooks();
                 this.loadCurrentBook();
                 this.renderBooksList();
-                this.showStatus('✅ Новая книга');
+                this.showStatus('✅ Новая книга создана');
             }
 
             switchBook(id) {
@@ -1179,12 +1217,12 @@
 
             deleteCurrentBook() {
                 if (this.books.length <= 1) {
-                    this.showStatus('❌ Нельзя удалить последнюю');
+                    this.showStatus('❌ Нельзя удалить последнюю книгу');
                     return;
                 }
                 
                 const currentBook = this.books.find(b => b.id === this.currentBookId);
-                if (confirm(`Удалить "${currentBook.title}"?`)) {
+                if (confirm(`Удалить книгу "${currentBook.title}"?`)) {
                     const currentIndex = this.books.findIndex(b => b.id === this.currentBookId);
                     
                     this.books = this.books.filter(b => b.id !== this.currentBookId);
@@ -1195,7 +1233,7 @@
                     this.saveBooks();
                     this.loadCurrentBook();
                     this.renderBooksList();
-                    this.showStatus('🗑️ Удалено');
+                    this.showStatus('🗑️ Книга удалена');
                 }
             }
 
@@ -1230,7 +1268,7 @@
                 const url = window.location.href.split('?')[0] + '?data=' + encoded;
                 
                 navigator.clipboard.writeText(url).then(() => {
-                    this.showStatus('✅ Ссылка скопирована');
+                    this.showStatus('✅ Ссылка скопирована!');
                 }).catch(() => {
                     prompt('Скопируй ссылку:', url);
                 });
@@ -1240,12 +1278,12 @@
                 event.stopPropagation();
                 
                 if (this.books.length <= 1) {
-                    this.showStatus('❌ Нельзя удалить последнюю');
+                    this.showStatus('❌ Нельзя удалить последнюю книгу');
                     return;
                 }
                 
                 const book = this.books.find(b => b.id === id);
-                if (confirm(`Удалить "${book.title}"?`)) {
+                if (confirm(`Удалить книгу "${book.title}"?`)) {
                     if (id === this.currentBookId) {
                         const currentIndex = this.books.findIndex(b => b.id === id);
                         this.books = this.books.filter(b => b.id !== id);
@@ -1258,7 +1296,7 @@
                     
                     this.saveBooks();
                     this.renderBooksList();
-                    this.showStatus('🗑️ Удалено');
+                    this.showStatus('🗑️ Книга удалена');
                 }
             }
 
@@ -1290,7 +1328,7 @@
                 });
 
                 document.getElementById('addBookBtn').addEventListener('click', () => {
-                    const title = prompt('Название:', 'Новая книга');
+                    const title = prompt('Название новой книги:', 'Новая книга');
                     if (title) this.createNewBook(title);
                 });
 
