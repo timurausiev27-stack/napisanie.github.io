@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📚 Поиск в книге</title>
+    <title>📚 Поиск с навигацией</title>
     
     <!-- Для установки на ПК -->
     <link rel="manifest" href="manifest.json">
@@ -30,7 +30,7 @@
         }
 
         .book-container {
-            width: 1000px;
+            width: 1100px;
             max-width: 100%;
             position: relative;
         }
@@ -258,15 +258,16 @@
             transform: scale(1.05);
         }
 
+        /* Результаты поиска */
         .search-results {
             background: rgba(44, 24, 16, 0.95);
             border: 2px solid #b87c4b;
             border-radius: 30px;
-            padding: 15px 20px;
+            padding: 15px;
             margin-bottom: 20px;
             color: #d4af37;
             font-family: 'Georgia', serif;
-            max-height: 200px;
+            max-height: 300px;
             overflow-y: auto;
             display: none;
         }
@@ -276,7 +277,10 @@
         }
 
         .search-result-item {
-            padding: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
             margin: 5px 0;
             background: rgba(184, 124, 75, 0.2);
             border-radius: 15px;
@@ -290,23 +294,66 @@
             transform: translateX(5px);
         }
 
+        .search-result-number {
+            width: 30px;
+            height: 30px;
+            background: #d4af37;
+            color: #2c1810;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .search-result-content {
+            flex: 1;
+        }
+
         .search-result-preview {
             color: #fffcf0;
             font-size: 14px;
-            margin-top: 5px;
+            margin: 5px 0;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
-        .search-result-count {
+        .search-result-location {
             color: #b87c4b;
             font-size: 12px;
-            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .search-result-arrow {
+            font-size: 20px;
+            color: #d4af37;
+            opacity: 0.7;
+        }
+
+        .search-result-item:hover .search-result-arrow {
+            opacity: 1;
+            transform: translateX(5px);
+        }
+
+        .search-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #b87c4b;
+        }
+
+        .search-stats {
+            font-size: 14px;
+            color: #b87c4b;
         }
 
         .close-search {
-            float: right;
             cursor: pointer;
             color: #c44b4b;
             font-size: 20px;
@@ -332,17 +379,26 @@
             font-weight: bold;
         }
 
+        .current-highlight {
+            background-color: #ff9800 !important;
+            color: #2c1810 !important;
+            padding: 2px;
+            border-radius: 3px;
+            font-weight: bold;
+            box-shadow: 0 0 0 2px #ff5722;
+        }
+
         .page {
             width: 100%;
-            height: 500px;
-            max-height: 60vh;
+            height: 450px;
+            max-height: 55vh;
             background: #fffcf0;
             border-radius: 20px;
             box-shadow: 
                 0 20px 40px rgba(0, 0, 0, 0.6),
                 0 0 0 2px #b87c4b,
                 0 0 0 6px #5d3a1a;
-            padding: 40px 50px;
+            padding: 30px 40px;
             position: relative;
             overflow-y: auto;
             font-family: 'Courier New', 'Georgia', serif;
@@ -356,8 +412,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
             border-bottom: 2px solid #d4b99b;
             font-family: 'Georgia', serif;
             font-style: italic;
@@ -367,11 +423,12 @@
         .book-title {
             font-weight: bold;
             color: #6b4a2c;
+            font-size: 20px;
         }
 
         .writing-area {
             width: 100%;
-            min-height: calc(100% - 100px);
+            min-height: calc(100% - 80px);
             outline: none;
             white-space: pre-wrap;
             word-wrap: break-word;
@@ -450,6 +507,43 @@
         .offline-badge.show {
             display: block;
         }
+
+        /* Навигационные кнопки */
+        .search-navigation {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-left: auto;
+        }
+
+        .nav-arrow {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #d4af37;
+            color: #2c1810;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            border: 2px solid #b87c4b;
+        }
+
+        .nav-arrow:hover {
+            background: #e5c158;
+            transform: scale(1.05);
+        }
+
+        .nav-arrow.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .nav-arrow.disabled:hover {
+            transform: none;
+            background: #d4af37;
+        }
     </style>
 </head>
 <body>
@@ -498,12 +592,18 @@
         <div class="search-panel">
             <input type="text" id="searchInput" class="search-input" placeholder="🔍 Найти слово в этой книге...">
             <button class="search-btn" id="searchBtn">Найти</button>
+            <div class="search-navigation" id="searchNavigation" style="display: none;">
+                <div class="nav-arrow" id="prevMatch">←</div>
+                <span id="matchCounter">0/0</span>
+                <div class="nav-arrow" id="nextMatch">→</div>
+            </div>
         </div>
 
         <!-- Результаты поиска -->
         <div class="search-results" id="searchResults">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <div class="search-header">
                 <span id="searchResultsTitle">Результаты поиска</span>
+                <span class="search-stats" id="searchStats"></span>
                 <span class="close-search" id="closeSearch">✕</span>
             </div>
             <div id="searchResultsList"></div>
@@ -550,11 +650,19 @@
                 this.searchResults = document.getElementById('searchResults');
                 this.searchResultsList = document.getElementById('searchResultsList');
                 this.closeSearch = document.getElementById('closeSearch');
+                this.searchNavigation = document.getElementById('searchNavigation');
+                this.matchCounter = document.getElementById('matchCounter');
+                this.prevMatch = document.getElementById('prevMatch');
+                this.nextMatch = document.getElementById('nextMatch');
+                this.searchStats = document.getElementById('searchStats');
+                
+                // Данные для поиска
+                this.matches = [];
+                this.currentMatchIndex = -1;
                 
                 // Единый массив для всех книг
                 this.books = [];
                 this.currentBookId = null;
-                this.currentHighlights = [];
                 
                 // Сначала загружаем настройки шрифта
                 this.loadFontSettings();
@@ -573,6 +681,10 @@
                 });
                 this.closeSearch.addEventListener('click', () => this.hideSearchResults());
                 
+                // Навигация по результатам
+                this.prevMatch.addEventListener('click', () => this.navigateMatches('prev'));
+                this.nextMatch.addEventListener('click', () => this.navigateMatches('next'));
+                
                 // Назначаем обработчики для кнопок шрифта
                 this.setupFontButtons();
             }
@@ -588,58 +700,73 @@
                 const book = this.books.find(b => b.id === this.currentBookId);
                 if (!book) return;
 
-                // Получаем текст без HTML тегов для поиска
+                // Получаем чистый текст
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = book.content;
                 const plainText = tempDiv.textContent || tempDiv.innerText || '';
 
-                // Ищем все вхождения
+                // Находим все совпадения
                 const regex = new RegExp(searchText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
-                const matches = [];
+                this.matches = [];
                 let match;
 
-                // Временно убираем подсветку
+                // Очищаем подсветку
                 this.clearHighlights();
 
                 while ((match = regex.exec(plainText)) !== null) {
-                    matches.push({
+                    this.matches.push({
                         index: match.index,
                         word: match[0],
                         length: match[0].length
                     });
                 }
 
-                if (matches.length === 0) {
+                if (this.matches.length === 0) {
                     this.showStatus('🔍 Ничего не найдено');
                     this.hideSearchResults();
                     return;
                 }
 
-                // Показываем результаты
-                this.showSearchResults(matches, plainText, searchText);
+                // Подсвечиваем все вхождения
+                this.highlightAllMatches(searchText);
                 
-                // Подсвечиваем в тексте
-                this.highlightText(searchText);
+                // Показываем список результатов
+                this.showSearchResultsList(searchText);
+                
+                // Показываем навигацию
+                this.searchNavigation.style.display = 'flex';
+                this.currentMatchIndex = 0;
+                this.updateMatchCounter();
+                this.highlightCurrentMatch();
+
+                this.searchResults.classList.add('show');
+                this.searchStats.textContent = `Найдено: ${this.matches.length}`;
             }
 
-            // Подсветка найденного текста
-            highlightText(searchText) {
+            // Подсветка всех найденных слов
+            highlightAllMatches(searchText) {
                 const content = this.writingArea.innerHTML;
                 const regex = new RegExp(`(${searchText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-                
-                // Временно сохраняем позицию курсора
-                const selection = window.getSelection();
-                const range = selection.getRangeCount() ? selection.getRangeAt(0) : null;
-                
-                // Заменяем на подсвеченный текст
                 this.writingArea.innerHTML = content.replace(regex, '<span class="highlight">$1</span>');
-                
-                // Восстанавливаем позицию курсора (примерно)
-                if (range) {
-                    try {
-                        selection.removeAllRanges();
-                        selection.addRange(range);
-                    } catch (e) {}
+            }
+
+            // Подсветка текущего выбранного совпадения
+            highlightCurrentMatch() {
+                // Сначала убираем оранжевую подсветку со всех
+                const highlights = document.querySelectorAll('.highlight');
+                highlights.forEach(h => {
+                    h.classList.remove('current-highlight');
+                });
+
+                // Подсвечиваем текущее оранжевым
+                if (this.currentMatchIndex >= 0 && highlights.length > this.currentMatchIndex) {
+                    highlights[this.currentMatchIndex].classList.add('current-highlight');
+                    
+                    // Прокручиваем к текущему совпадению
+                    highlights[this.currentMatchIndex].scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
                 }
             }
 
@@ -649,80 +776,89 @@
                 this.writingArea.innerHTML = content.replace(/<span class="highlight">(.*?)<\/span>/g, '$1');
             }
 
-            // Показать результаты поиска
-            showSearchResults(matches, fullText, searchText) {
+            // Показать список результатов
+            showSearchResultsList(searchText) {
                 let html = '';
-                const maxPreviews = 5; // Показываем максимум 5 превью
                 
-                matches.slice(0, maxPreviews).forEach((match, index) => {
-                    // Берем контекст (50 символов до и после)
-                    const start = Math.max(0, match.index - 50);
-                    const end = Math.min(fullText.length, match.index + match.length + 50);
-                    let preview = fullText.substring(start, end);
+                this.matches.forEach((match, index) => {
+                    const book = this.books.find(b => b.id === this.currentBookId);
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = book.content;
+                    const plainText = tempDiv.textContent || tempDiv.innerText || '';
                     
-                    // Выделяем найденное слово в превью
-                    const previewRegex = new RegExp(`(${searchText})`, 'gi');
-                    preview = preview.replace(previewRegex, '<span style="background: #ffeb3b; color: #2c1810; padding: 2px; border-radius: 3px;">$1</span>');
+                    // Контекст (30 символов до и после)
+                    const start = Math.max(0, match.index - 30);
+                    const end = Math.min(plainText.length, match.index + match.length + 30);
+                    let preview = plainText.substring(start, end);
+                    
+                    // Выделяем найденное слово
+                    preview = preview.replace(
+                        new RegExp(`(${searchText})`, 'gi'),
+                        '<span style="background: #ffeb3b; color: #2c1810; padding: 2px;">$1</span>'
+                    );
+                    
+                    // Определяем позицию (строка)
+                    const lineNumber = (plainText.substring(0, match.index).match(/\n/g) || []).length + 1;
                     
                     html += `
-                        <div class="search-result-item" onclick="app.goToMatch(${match.index})">
-                            <div style="font-weight: bold;">Найдено: "${match.word}"</div>
-                            <div class="search-result-preview">...${preview}...</div>
+                        <div class="search-result-item" onclick="app.goToMatch(${index})">
+                            <div class="search-result-number">${index + 1}</div>
+                            <div class="search-result-content">
+                                <div class="search-result-preview">${preview}</div>
+                                <div class="search-result-location">
+                                    <span>📍 Строка ${lineNumber}</span>
+                                    <span class="search-result-arrow">→</span>
+                                </div>
+                            </div>
                         </div>
                     `;
                 });
 
-                if (matches.length > maxPreviews) {
-                    html += `<div class="search-result-count">... и еще ${matches.length - maxPreviews} совпадений</div>`;
-                }
-
                 this.searchResultsList.innerHTML = html;
-                this.searchResults.classList.add('show');
-                
-                this.showStatus(`🔍 Найдено: ${matches.length} совпадений`);
             }
 
-            // Перейти к найденному слову
+            // Перейти к выбранному совпадению
             goToMatch(index) {
-                // Фокусируемся на области ввода
-                this.writingArea.focus();
+                this.currentMatchIndex = index;
+                this.highlightCurrentMatch();
+                this.updateMatchCounter();
                 
-                // Пытаемся установить курсор на найденное слово (приблизительно)
-                const range = document.createRange();
-                const sel = window.getSelection();
-                
-                // Ищем элемент с текстом
-                let textNode = null;
-                let charCount = 0;
-                
-                function findTextNode(node, targetIndex) {
-                    if (node.nodeType === 3) { // Текстовый узел
-                        if (charCount + node.length > targetIndex) {
-                            return { node, offset: targetIndex - charCount };
-                        }
-                        charCount += node.length;
-                    } else {
-                        for (let child of node.childNodes) {
-                            const result = findTextNode(child, targetIndex);
-                            if (result) return result;
-                        }
-                    }
-                    return null;
+                // Прокрутка
+                const highlights = document.querySelectorAll('.highlight');
+                if (highlights[index]) {
+                    highlights[index].scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
                 }
+            }
 
-                const result = findTextNode(this.writingArea, index);
-                if (result) {
-                    range.setStart(result.node, result.offset);
-                    range.setEnd(result.node, result.offset + 1);
-                    sel.removeAllRanges();
-                    sel.addRange(range);
+            // Навигация по стрелкам
+            navigateMatches(direction) {
+                if (this.matches.length === 0) return;
+                
+                if (direction === 'next') {
+                    this.currentMatchIndex = (this.currentMatchIndex + 1) % this.matches.length;
+                } else {
+                    this.currentMatchIndex = (this.currentMatchIndex - 1 + this.matches.length) % this.matches.length;
                 }
+                
+                this.highlightCurrentMatch();
+                this.updateMatchCounter();
+            }
+
+            // Обновить счетчик
+            updateMatchCounter() {
+                this.matchCounter.textContent = `${this.currentMatchIndex + 1}/${this.matches.length}`;
             }
 
             // Скрыть результаты поиска
             hideSearchResults() {
                 this.searchResults.classList.remove('show');
+                this.searchNavigation.style.display = 'none';
                 this.clearHighlights();
+                this.matches = [];
+                this.currentMatchIndex = -1;
             }
 
             // Загрузка настроек шрифта из localStorage
