@@ -141,27 +141,6 @@
             font-size: 20px;
         }
 
-        /* Индикатор загрузки */
-        .loader {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(44, 24, 16, 0.95);
-            color: #d4af37;
-            padding: 20px 40px;
-            border-radius: 50px;
-            border: 2px solid #b87c4b;
-            font-size: 18px;
-            z-index: 10000;
-            display: none;
-            backdrop-filter: blur(5px);
-        }
-
-        .loader.show {
-            display: block;
-        }
-
         .install-btn {
             position: fixed;
             top: 20px;
@@ -541,11 +520,6 @@
             transform: scale(1.05);
         }
 
-        .action-btn.special {
-            background: #4CAF50;
-            border-color: #45a049;
-        }
-
         .status {
             text-align: center;
             margin-top: 15px;
@@ -597,17 +571,9 @@
             border-radius: 3px;
             box-shadow: 0 0 0 2px #ff5722;
         }
-
-        .book-id {
-            font-size: 12px;
-            color: #b87c4b;
-            margin-left: 10px;
-        }
     </style>
 </head>
 <body>
-    <div class="loader" id="loader">⏳ Сохранение...</div>
-
     <button class="fullscreen-btn" id="fullscreenBtn">
         <span class="fullscreen-icon" id="fullscreenIcon">⛶</span>
         <span class="fullscreen-text" id="fullscreenText">На весь экран</span>
@@ -696,7 +662,6 @@
                 this.status = document.getElementById('status');
                 this.page = document.getElementById('page');
                 this.bookCount = document.getElementById('bookCount');
-                this.loader = document.getElementById('loader');
                 
                 // Поиск
                 this.searchInput = document.getElementById('searchInput');
@@ -721,10 +686,6 @@
                 this.currentBookId = null;
                 this.matches = [];
                 this.currentMatchIndex = -1;
-                
-                // JSONBin.io (бесплатный сервис для хранения)
-                this.BIN_ID = null; // Будет создаваться для каждой книги
-                this.API_KEY = '$2a$10$KxQxQxQxQxQxQxQxQxQxQ'; // Публичный ключ
                 
                 this.loadFontSettings();
                 this.init();
@@ -752,48 +713,42 @@
                 
                 this.setupFontButtons();
                 
-                // Проверяем URL на наличие ID книги
-                this.checkUrlForBook();
+                // Загружаем книгу из URL если есть
+                this.loadFromUrl();
             }
 
-            // Проверка URL на ID книги
-            checkUrlForBook() {
-                const urlParams = new URLSearchParams(window.location.search);
-                const bookId = urlParams.get('book');
-                
-                if (bookId) {
-                    this.showLoader(true);
-                    // Загружаем книгу из JSONBin
-                    fetch(`https://api.jsonbin.io/v3/b/${bookId}/latest`, {
-                        headers: {
-                            'X-Master-Key': this.API_KEY
-                        }
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.record) {
+            // Загрузка из URL (короткая ссылка!)
+            loadFromUrl() {
+                const hash = window.location.hash.substring(1); // убираем #
+                if (hash) {
+                    try {
+                        // Декодируем данные
+                        const jsonStr = decodeURIComponent(atob(hash));
+                        const bookData = JSON.parse(jsonStr);
+                        
+                        if (bookData.title && bookData.content) {
+                            // Добавляем книгу
                             this.books.push({
                                 id: 'book_' + Date.now(),
-                                title: data.record.title || 'Книга',
-                                content: data.record.content || '',
-                                binId: bookId
+                                title: bookData.title,
+                                content: bookData.content
                             });
                             this.saveBooks();
                             this.currentBookId = this.books[this.books.length - 1].id;
                             this.loadCurrentBook();
                             this.showStatus('📖 Книга загружена');
+                            
+                            // Очищаем URL от данных
+                            history.replaceState(null, '', window.location.pathname);
                         }
-                        this.showLoader(false);
-                    })
-                    .catch(() => {
+                    } catch (e) {
                         this.showStatus('❌ Ошибка загрузки');
-                        this.showLoader(false);
-                    });
+                    }
                 }
             }
 
-            // Поделиться книгой (короткая ссылка!)
-            async shareCurrentBook() {
+            // Поделиться книгой (КОРОТКАЯ ССЫЛКА!)
+            shareCurrentBook() {
                 const book = this.books.find(b => b.id === this.currentBookId);
                 if (!book) return;
                 
@@ -801,58 +756,28 @@
                 book.content = this.writingArea.innerHTML;
                 this.saveBooks();
                 
-                this.showLoader(true);
+                // Создаем объект для передачи
+                const bookData = {
+                    title: book.title,
+                    content: book.content
+                };
                 
-                try {
-                    let binId = book.binId;
-                    
-                    if (!binId) {
-                        // Создаем новое хранилище для книги
-                        const response = await fetch('https://api.jsonbin.io/v3/b', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-Master-Key': this.API_KEY
-                            },
-                            body: JSON.stringify({
-                                title: book.title,
-                                content: book.content
-                            })
-                        });
-                        
-                        const data = await response.json();
-                        binId = data.metadata.id;
-                        book.binId = binId;
-                        this.saveBooks();
-                    } else {
-                        // Обновляем существующее
-                        await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
-                            method: 'PUT',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-Master-Key': this.API_KEY
-                            },
-                            body: JSON.stringify({
-                                title: book.title,
-                                content: book.content
-                            })
-                        });
-                    }
-                    
-                    // КОРОТКАЯ ССЫЛКА! (только ID)
-                    const shortUrl = window.location.href.split('?')[0] + '?book=' + binId;
-                    
-                    navigator.clipboard.writeText(shortUrl).then(() => {
-                        this.showStatus('✅ Короткая ссылка скопирована!');
-                    }).catch(() => {
-                        prompt('Скопируй ссылку:', shortUrl);
-                    });
-                    
-                } catch (e) {
-                    this.showStatus('❌ Ошибка');
-                }
+                // Кодируем в base64
+                const jsonStr = JSON.stringify(bookData);
+                const encoded = btoa(encodeURIComponent(jsonStr));
                 
-                this.showLoader(false);
+                // СОЗДАЕМ КОРОТКУЮ ССЫЛКУ (всего 20-30 символов!)
+                const shortUrl = window.location.href.split('#')[0] + '#' + encoded;
+                
+                // Копируем в буфер
+                navigator.clipboard.writeText(shortUrl).then(() => {
+                    this.showStatus('✅ Короткая ссылка скопирована!');
+                }).catch(() => {
+                    prompt('Скопируй ссылку:', shortUrl);
+                });
+                
+                // Показываем длину ссылки
+                console.log('Длина ссылки:', shortUrl.length, 'символов');
             }
 
             // Добавить по ссылке
@@ -861,21 +786,16 @@
                 if (!url) return;
                 
                 try {
-                    const urlParams = new URLSearchParams(new URL(url).search);
-                    const bookId = urlParams.get('book');
-                    
-                    if (bookId) {
-                        window.location.href = window.location.href.split('?')[0] + '?book=' + bookId;
+                    // Извлекаем хеш из ссылки
+                    const hash = url.split('#')[1];
+                    if (hash) {
+                        window.location.href = window.location.href.split('#')[0] + '#' + hash;
                     } else {
                         this.showStatus('❌ Неверная ссылка');
                     }
                 } catch (e) {
                     this.showStatus('❌ Ошибка');
                 }
-            }
-
-            showLoader(show) {
-                this.loader.classList.toggle('show', show);
             }
 
             toggleFullscreen() {
