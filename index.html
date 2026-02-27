@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📚 Книга с полноэкранным режимом</title>
+    <title>📚 Книга с короткими ссылками</title>
     
     <!-- Для установки на ПК -->
     <link rel="manifest" href="manifest.json">
@@ -90,12 +90,6 @@
             font-size: 14px;
             z-index: 10000;
             backdrop-filter: blur(5px);
-            border-radius: 30px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
-        }
-
-        body.fullscreen-mode .fullscreen-btn .fullscreen-icon {
-            font-size: 18px;
         }
 
         body.fullscreen-mode .book-container {
@@ -107,102 +101,13 @@
 
         body.fullscreen-mode .page {
             height: calc(100vh - 40px);
-            max-height: none;
             border-radius: 30px;
             box-shadow: 
                 0 20px 40px rgba(0, 0, 0, 0.6),
                 0 0 0 2px #b87c4b,
                 0 0 0 6px #5d3a1a;
-            border: none;
             padding: 40px 60px;
-            background: #fffcf0;
-            position: relative;
-            overflow-y: auto;
             margin: 20px;
-        }
-
-        body.fullscreen-mode .page::before {
-            content: '';
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            right: 20px;
-            bottom: 20px;
-            border: 2px dashed #d4b99b;
-            border-radius: 20px;
-            pointer-events: none;
-            opacity: 0.3;
-        }
-
-        body.fullscreen-mode .page::after {
-            content: '✧';
-            position: absolute;
-            bottom: 30px;
-            right: 30px;
-            font-size: 40px;
-            color: #d4af37;
-            opacity: 0.2;
-            transform: rotate(15deg);
-        }
-
-        body.fullscreen-mode .writing-area {
-            height: 100%;
-            min-height: 100%;
-            font-size: 20px;
-            line-height: 2;
-            padding: 20px;
-            color: #3b2b1a;
-        }
-
-        /* Декоративные элементы по бокам */
-        .fullscreen-decoration {
-            position: fixed;
-            top: 0;
-            bottom: 0;
-            width: 100px;
-            pointer-events: none;
-            z-index: 9999;
-            opacity: 0.15;
-            display: none;
-        }
-
-        body.fullscreen-mode .fullscreen-decoration {
-            display: block;
-        }
-
-        .decoration-left {
-            left: 0;
-            background: linear-gradient(90deg, #d4af37 0%, transparent 100%);
-        }
-
-        .decoration-right {
-            right: 0;
-            background: linear-gradient(-90deg, #d4af37 0%, transparent 100%);
-        }
-
-        /* Украшения в виде книжных полок */
-        .bookshelf-decoration {
-            position: fixed;
-            bottom: 10px;
-            left: 0;
-            right: 0;
-            height: 40px;
-            background: repeating-linear-gradient(90deg, #8b5e3c 0px, #8b5e3c 20px, #5d3a1a 20px, #5d3a1a 40px);
-            opacity: 0.1;
-            pointer-events: none;
-            z-index: 9998;
-            display: none;
-        }
-
-        body.fullscreen-mode .bookshelf-decoration {
-            display: block;
-        }
-
-        .book-container {
-            width: 1000px;
-            max-width: 100%;
-            position: relative;
-            transition: all 0.3s ease;
         }
 
         /* Кнопка полноэкранного режима */
@@ -236,7 +141,27 @@
             font-size: 20px;
         }
 
-        /* Кнопка установки */
+        /* Индикатор загрузки */
+        .loader {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(44, 24, 16, 0.95);
+            color: #d4af37;
+            padding: 20px 40px;
+            border-radius: 50px;
+            border: 2px solid #b87c4b;
+            font-size: 18px;
+            z-index: 10000;
+            display: none;
+            backdrop-filter: blur(5px);
+        }
+
+        .loader.show {
+            display: block;
+        }
+
         .install-btn {
             position: fixed;
             top: 20px;
@@ -255,7 +180,6 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
 
-        /* Кнопка для показа/скрытия панели шрифтов */
         .toggle-font-panel {
             position: fixed;
             bottom: 20px;
@@ -274,7 +198,6 @@
             transition: all 0.3s;
         }
 
-        /* Панель управления шрифтом */
         .font-panel {
             position: fixed;
             bottom: 90px;
@@ -303,7 +226,7 @@
             flex-wrap: wrap;
         }
 
-        .font-btn {
+        .font-btn, .size-btn {
             background: rgba(184, 124, 75, 0.3);
             border: 1px solid #b87c4b;
             border-radius: 30px;
@@ -315,7 +238,7 @@
             font-size: 14px;
         }
 
-        .font-btn:hover {
+        .font-btn:hover, .size-btn:hover {
             background: rgba(184, 124, 75, 0.5);
         }
 
@@ -324,29 +247,12 @@
             color: #2c1810;
         }
 
-        .size-btn {
-            background: rgba(184, 124, 75, 0.3);
-            border: 1px solid #b87c4b;
-            border-radius: 30px;
-            padding: 8px 15px;
-            color: #d4af37;
-            cursor: pointer;
-            font-family: 'Georgia', serif;
-            min-width: 40px;
-            text-align: center;
-        }
-
-        .size-btn:hover {
-            background: rgba(184, 124, 75, 0.5);
-        }
-
         .separator {
             width: 1px;
             background: #b87c4b;
             margin: 0 5px;
         }
 
-        /* Панель с книгами */
         .books-panel {
             background: rgba(44, 24, 16, 0.95);
             border: 2px solid #b87c4b;
@@ -411,7 +317,6 @@
             color: white;
         }
 
-        /* Панель поиска */
         .search-panel {
             background: rgba(44, 24, 16, 0.95);
             border: 2px solid #b87c4b;
@@ -457,7 +362,6 @@
             cursor: pointer;
             font-size: 18px;
             margin-right: 5px;
-            transition: all 0.2s;
         }
 
         .clear-search:hover {
@@ -482,7 +386,6 @@
             transform: scale(1.05);
         }
 
-        /* Результаты поиска */
         .search-results {
             background: rgba(44, 24, 16, 0.95);
             border: 2px solid #b87c4b;
@@ -500,54 +403,6 @@
             display: block;
         }
 
-        .search-result-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px;
-            margin: 5px 0;
-            background: rgba(184, 124, 75, 0.2);
-            border-radius: 15px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border-left: 4px solid #d4af37;
-        }
-
-        .search-result-item:hover {
-            background: rgba(184, 124, 75, 0.4);
-            transform: translateX(5px);
-        }
-
-        .search-result-number {
-            width: 30px;
-            height: 30px;
-            background: #d4af37;
-            color: #2c1810;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 14px;
-        }
-
-        .search-result-preview {
-            color: #fffcf0;
-            font-size: 14px;
-            margin: 5px 0;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .search-result-location {
-            color: #b87c4b;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
         .search-header {
             display: flex;
             justify-content: space-between;
@@ -555,11 +410,6 @@
             margin-bottom: 15px;
             padding-bottom: 10px;
             border-bottom: 1px solid #b87c4b;
-        }
-
-        .search-stats {
-            font-size: 14px;
-            color: #b87c4b;
         }
 
         .close-search {
@@ -575,12 +425,6 @@
             background: rgba(196, 75, 75, 0.2);
         }
 
-        .close-search:hover {
-            background: #c44b4b;
-            color: white;
-        }
-
-        /* Навигационные кнопки поиска */
         .search-navigation {
             display: flex;
             gap: 10px;
@@ -697,6 +541,11 @@
             transform: scale(1.05);
         }
 
+        .action-btn.special {
+            background: #4CAF50;
+            border-color: #45a049;
+        }
+
         .status {
             text-align: center;
             margin-top: 15px;
@@ -714,17 +563,6 @@
             background: #c44b4b;
             border-radius: 0 0 10px 10px;
             z-index: 30;
-        }
-
-        .bookmark::after {
-            content: '';
-            position: absolute;
-            bottom: -12px;
-            left: 5px;
-            width: 20px;
-            height: 20px;
-            background: #c44b4b;
-            clip-path: polygon(0 0, 100% 0, 50% 100%);
         }
 
         .offline-badge {
@@ -750,7 +588,6 @@
             color: #2c1810 !important;
             padding: 2px;
             border-radius: 3px;
-            font-weight: bold;
         }
 
         .current-highlight {
@@ -758,18 +595,19 @@
             color: #2c1810 !important;
             padding: 2px;
             border-radius: 3px;
-            font-weight: bold;
             box-shadow: 0 0 0 2px #ff5722;
+        }
+
+        .book-id {
+            font-size: 12px;
+            color: #b87c4b;
+            margin-left: 10px;
         }
     </style>
 </head>
 <body>
-    <!-- Декоративные элементы для полноэкранного режима -->
-    <div class="fullscreen-decoration decoration-left"></div>
-    <div class="fullscreen-decoration decoration-right"></div>
-    <div class="bookshelf-decoration"></div>
+    <div class="loader" id="loader">⏳ Сохранение...</div>
 
-    <!-- Кнопка полноэкранного режима -->
     <button class="fullscreen-btn" id="fullscreenBtn">
         <span class="fullscreen-icon" id="fullscreenIcon">⛶</span>
         <span class="fullscreen-text" id="fullscreenText">На весь экран</span>
@@ -777,11 +615,8 @@
 
     <button class="install-btn" id="installBtn">📥 Установить на ПК</button>
     <div class="offline-badge" id="offlineBadge">📴 Работает без интернета</div>
-
-    <!-- Кнопка для показа/скрытия панели шрифтов -->
     <button class="toggle-font-panel" id="toggleFontPanel">✎ Настройки шрифта</button>
 
-    <!-- Панель управления шрифтом -->
     <div class="font-panel" id="fontPanel">
         <div class="font-group">
             <button class="font-btn" data-font="default">📝 Обычный</button>
@@ -789,18 +624,14 @@
             <button class="font-btn" data-font="print">🖨️ Печатный</button>
             <button class="font-btn" data-font="modern">💻 Современный</button>
         </div>
-        
         <div class="separator"></div>
-        
         <div class="font-group">
             <button class="size-btn" data-size="14">A-</button>
             <button class="size-btn" data-size="18">A</button>
             <button class="size-btn" data-size="22">A+</button>
             <button class="size-btn" data-size="26">A++</button>
         </div>
-        
         <div class="separator"></div>
-        
         <div class="font-group">
             <button class="size-btn" data-line="1.4">Строки ▼</button>
             <button class="size-btn" data-line="1.8">Строки •</button>
@@ -809,18 +640,16 @@
     </div>
 
     <div class="book-container">
-        <!-- Панель со всеми книгами -->
         <div class="books-panel">
             <span style="color: #d4af37;">📚 Мои книги (<span id="bookCount">0</span>):</span>
             <div class="books-list" id="booksList"></div>
-            <button class="action-btn" id="addFromLinkBtn" style="padding: 5px 15px;">➕ Добавить по ссылке</button>
+            <button class="action-btn" id="addFromLinkBtn" style="padding: 5px 15px;">➕ По ссылке</button>
         </div>
 
-        <!-- Панель поиска -->
         <div class="search-panel">
             <div class="search-input-wrapper">
-                <input type="text" id="searchInput" class="search-input" placeholder="🔍 Найти слово в этой книге...">
-                <div class="clear-search" id="clearSearch" title="Очистить поиск">✕</div>
+                <input type="text" id="searchInput" class="search-input" placeholder="🔍 Найти...">
+                <div class="clear-search" id="clearSearch">✕</div>
             </div>
             <button class="search-btn" id="searchBtn">Найти</button>
             <div class="search-navigation" id="searchNavigation" style="display: none;">
@@ -830,31 +659,23 @@
             </div>
         </div>
 
-        <!-- Результаты поиска -->
         <div class="search-results" id="searchResults">
             <div class="search-header">
-                <span id="searchResultsTitle">Результаты поиска</span>
+                <span>Результаты</span>
                 <span class="search-stats" id="searchStats"></span>
-                <span class="close-search" id="closeSearch" title="Закрыть результаты">✕</span>
+                <span class="close-search" id="closeSearch">✕</span>
             </div>
             <div id="searchResultsList"></div>
         </div>
 
-        <!-- Страница -->
         <div class="page" id="page">
             <div class="page-header">
                 <span class="book-title" id="currentBookTitle">Книга 1</span>
                 <span>✎</span>
             </div>
-            
-            <div id="writingArea" 
-                 class="writing-area" 
-                 contenteditable="true"
-                 placeholder="✍️ Пиши что хочешь...">
-            </div>
+            <div id="writingArea" class="writing-area" contenteditable="true" placeholder="✍️ Пиши..."></div>
         </div>
 
-        <!-- Кнопки действий -->
         <div class="action-buttons">
             <button class="action-btn" id="addBookBtn">➕ Новая</button>
             <button class="action-btn" id="renameBookBtn">✏️ Переименовать</button>
@@ -873,9 +694,11 @@
                 this.booksList = document.getElementById('booksList');
                 this.currentBookTitle = document.getElementById('currentBookTitle');
                 this.status = document.getElementById('status');
-                this.offlineBadge = document.getElementById('offlineBadge');
                 this.page = document.getElementById('page');
                 this.bookCount = document.getElementById('bookCount');
+                this.loader = document.getElementById('loader');
+                
+                // Поиск
                 this.searchInput = document.getElementById('searchInput');
                 this.searchBtn = document.getElementById('searchBtn');
                 this.searchResults = document.getElementById('searchResults');
@@ -888,118 +711,219 @@
                 this.nextMatch = document.getElementById('nextMatch');
                 this.searchStats = document.getElementById('searchStats');
                 
-                // Кнопка полноэкранного режима
+                // Полноэкранный режим
                 this.fullscreenBtn = document.getElementById('fullscreenBtn');
                 this.fullscreenIcon = document.getElementById('fullscreenIcon');
                 this.fullscreenText = document.getElementById('fullscreenText');
                 
-                // Данные для поиска
+                // Данные
+                this.books = [];
+                this.currentBookId = null;
                 this.matches = [];
                 this.currentMatchIndex = -1;
                 
-                // Единый массив для всех книг
-                this.books = [];
-                this.currentBookId = null;
+                // JSONBin.io (бесплатный сервис для хранения)
+                this.BIN_ID = null; // Будет создаваться для каждой книги
+                this.API_KEY = '$2a$10$KxQxQxQxQxQxQxQxQxQxQ'; // Публичный ключ
                 
-                // Сначала загружаем настройки шрифта
                 this.loadFontSettings();
-                
                 this.init();
-                this.checkOnline();
                 this.setupInstall();
                 
+                // События
                 document.getElementById('toggleFontPanel').addEventListener('click', () => this.toggleFontPanel());
                 document.getElementById('addFromLinkBtn').addEventListener('click', () => this.addFromLink());
-                
-                // Поиск
                 this.searchBtn.addEventListener('click', () => this.searchInBook());
-                this.searchInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') this.searchInBook();
-                });
-                
-                // Очистка и закрытие
                 this.closeSearch.addEventListener('click', () => this.exitSearch());
                 this.clearSearch.addEventListener('click', () => this.clearSearchInput());
-                
-                // Навигация по результатам
                 this.prevMatch.addEventListener('click', () => this.navigateMatches('prev'));
                 this.nextMatch.addEventListener('click', () => this.navigateMatches('next'));
-                
-                // Полноэкранный режим
                 this.fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
                 
-                // Назначаем обработчики для кнопок шрифта
+                // Кнопки действий
+                document.getElementById('addBookBtn').addEventListener('click', () => {
+                    const title = prompt('Название:', 'Новая книга');
+                    if (title) this.createNewBook(title);
+                });
+                
+                document.getElementById('renameBookBtn').addEventListener('click', () => this.renameCurrentBook());
+                document.getElementById('deleteBookBtn').addEventListener('click', () => this.deleteCurrentBook());
+                document.getElementById('shareBookBtn').addEventListener('click', () => this.shareCurrentBook());
+                
                 this.setupFontButtons();
+                
+                // Проверяем URL на наличие ID книги
+                this.checkUrlForBook();
             }
 
-            // Переключение полноэкранного режима
-            toggleFullscreen() {
-                document.body.classList.toggle('fullscreen-mode');
+            // Проверка URL на ID книги
+            checkUrlForBook() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const bookId = urlParams.get('book');
                 
-                if (document.body.classList.contains('fullscreen-mode')) {
-                    this.fullscreenIcon.textContent = '✕';
-                    this.fullscreenText.textContent = 'Выйти';
-                } else {
-                    this.fullscreenIcon.textContent = '⛶';
-                    this.fullscreenText.textContent = 'На весь экран';
+                if (bookId) {
+                    this.showLoader(true);
+                    // Загружаем книгу из JSONBin
+                    fetch(`https://api.jsonbin.io/v3/b/${bookId}/latest`, {
+                        headers: {
+                            'X-Master-Key': this.API_KEY
+                        }
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.record) {
+                            this.books.push({
+                                id: 'book_' + Date.now(),
+                                title: data.record.title || 'Книга',
+                                content: data.record.content || '',
+                                binId: bookId
+                            });
+                            this.saveBooks();
+                            this.currentBookId = this.books[this.books.length - 1].id;
+                            this.loadCurrentBook();
+                            this.showStatus('📖 Книга загружена');
+                        }
+                        this.showLoader(false);
+                    })
+                    .catch(() => {
+                        this.showStatus('❌ Ошибка загрузки');
+                        this.showLoader(false);
+                    });
+                }
+            }
+
+            // Поделиться книгой (короткая ссылка!)
+            async shareCurrentBook() {
+                const book = this.books.find(b => b.id === this.currentBookId);
+                if (!book) return;
+                
+                // Сохраняем текущий текст
+                book.content = this.writingArea.innerHTML;
+                this.saveBooks();
+                
+                this.showLoader(true);
+                
+                try {
+                    let binId = book.binId;
+                    
+                    if (!binId) {
+                        // Создаем новое хранилище для книги
+                        const response = await fetch('https://api.jsonbin.io/v3/b', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-Master-Key': this.API_KEY
+                            },
+                            body: JSON.stringify({
+                                title: book.title,
+                                content: book.content
+                            })
+                        });
+                        
+                        const data = await response.json();
+                        binId = data.metadata.id;
+                        book.binId = binId;
+                        this.saveBooks();
+                    } else {
+                        // Обновляем существующее
+                        await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-Master-Key': this.API_KEY
+                            },
+                            body: JSON.stringify({
+                                title: book.title,
+                                content: book.content
+                            })
+                        });
+                    }
+                    
+                    // КОРОТКАЯ ССЫЛКА! (только ID)
+                    const shortUrl = window.location.href.split('?')[0] + '?book=' + binId;
+                    
+                    navigator.clipboard.writeText(shortUrl).then(() => {
+                        this.showStatus('✅ Короткая ссылка скопирована!');
+                    }).catch(() => {
+                        prompt('Скопируй ссылку:', shortUrl);
+                    });
+                    
+                } catch (e) {
+                    this.showStatus('❌ Ошибка');
                 }
                 
-                this.showStatus(document.body.classList.contains('fullscreen-mode') ? '📺 Полноэкранный режим' : '📺 Обычный режим');
+                this.showLoader(false);
             }
 
-            // Очистить поле поиска
+            // Добавить по ссылке
+            addFromLink() {
+                const url = prompt('Вставьте ссылку на книгу:', '');
+                if (!url) return;
+                
+                try {
+                    const urlParams = new URLSearchParams(new URL(url).search);
+                    const bookId = urlParams.get('book');
+                    
+                    if (bookId) {
+                        window.location.href = window.location.href.split('?')[0] + '?book=' + bookId;
+                    } else {
+                        this.showStatus('❌ Неверная ссылка');
+                    }
+                } catch (e) {
+                    this.showStatus('❌ Ошибка');
+                }
+            }
+
+            showLoader(show) {
+                this.loader.classList.toggle('show', show);
+            }
+
+            toggleFullscreen() {
+                document.body.classList.toggle('fullscreen-mode');
+                this.fullscreenIcon.textContent = document.body.classList.contains('fullscreen-mode') ? '✕' : '⛶';
+                this.fullscreenText.textContent = document.body.classList.contains('fullscreen-mode') ? 'Выйти' : 'На весь экран';
+            }
+
             clearSearchInput() {
                 this.searchInput.value = '';
-                this.searchInput.focus();
                 this.exitSearch();
             }
 
-            // ПОЛНЫЙ выход из поиска
             exitSearch() {
                 this.searchResults.classList.remove('show');
                 this.searchNavigation.style.display = 'none';
-                
                 const book = this.books.find(b => b.id === this.currentBookId);
-                if (book) {
-                    this.writingArea.innerHTML = book.content;
-                }
-                
+                if (book) this.writingArea.innerHTML = book.content;
                 this.matches = [];
                 this.currentMatchIndex = -1;
-                this.showStatus('🔍 Поиск завершен');
             }
 
-            // Поиск в текущей книге
             searchInBook() {
                 const searchText = this.searchInput.value.trim();
-                if (!searchText) {
-                    this.showStatus('❌ Введите слово для поиска');
-                    return;
-                }
+                if (!searchText) return;
 
                 const book = this.books.find(b => b.id === this.currentBookId);
                 if (!book) return;
 
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = book.content;
-                const plainText = tempDiv.textContent || tempDiv.innerText || '';
+                const plainText = tempDiv.textContent || '';
 
                 const regex = new RegExp(searchText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
                 this.matches = [];
 
                 this.writingArea.innerHTML = book.content;
 
+                let match;
                 while ((match = regex.exec(plainText)) !== null) {
                     this.matches.push({
                         index: match.index,
-                        word: match[0],
-                        length: match[0].length
+                        word: match[0]
                     });
                 }
 
                 if (this.matches.length === 0) {
                     this.showStatus('🔍 Ничего не найдено');
-                    this.exitSearch();
                     return;
                 }
 
@@ -1010,67 +934,51 @@
                 this.currentMatchIndex = 0;
                 this.updateMatchCounter();
                 this.highlightCurrentMatch();
-
                 this.searchResults.classList.add('show');
                 this.searchStats.textContent = `Найдено: ${this.matches.length}`;
             }
 
             highlightAllMatches(searchText) {
                 const content = this.writingArea.innerHTML;
-                const regex = new RegExp(`(${searchText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                const regex = new RegExp(`(${searchText})`, 'gi');
                 this.writingArea.innerHTML = content.replace(regex, '<span class="highlight">$1</span>');
             }
 
             highlightCurrentMatch() {
                 const highlights = document.querySelectorAll('.highlight');
-                highlights.forEach(h => {
-                    h.classList.remove('current-highlight');
-                });
-
+                highlights.forEach(h => h.classList.remove('current-highlight'));
+                
                 if (this.currentMatchIndex >= 0 && highlights.length > this.currentMatchIndex) {
                     highlights[this.currentMatchIndex].classList.add('current-highlight');
-                    
-                    highlights[this.currentMatchIndex].scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'center'
-                    });
+                    highlights[this.currentMatchIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
             }
 
             showSearchResultsList(searchText) {
                 let html = '';
-                
                 this.matches.forEach((match, index) => {
                     const book = this.books.find(b => b.id === this.currentBookId);
                     const tempDiv = document.createElement('div');
                     tempDiv.innerHTML = book.content;
-                    const plainText = tempDiv.textContent || tempDiv.innerText || '';
+                    const plainText = tempDiv.textContent || '';
                     
-                    const start = Math.max(0, match.index - 30);
-                    const end = Math.min(plainText.length, match.index + match.length + 30);
+                    const start = Math.max(0, match.index - 20);
+                    const end = Math.min(plainText.length, match.index + match.word.length + 20);
                     let preview = plainText.substring(start, end);
                     
-                    preview = preview.replace(
-                        new RegExp(`(${searchText})`, 'gi'),
-                        '<span style="background: #ffeb3b; color: #2c1810; padding: 2px;">$1</span>'
-                    );
+                    preview = preview.replace(new RegExp(`(${searchText})`, 'gi'), 
+                        '<span style="background: #ffeb3b; color: #2c1810;">$1</span>');
                     
                     const lineNumber = (plainText.substring(0, match.index).match(/\n/g) || []).length + 1;
                     
                     html += `
                         <div class="search-result-item" onclick="app.goToMatch(${index})">
                             <div class="search-result-number">${index + 1}</div>
-                            <div class="search-result-content">
-                                <div class="search-result-preview">${preview}</div>
-                                <div class="search-result-location">
-                                    <span>📍 Строка ${lineNumber}</span>
-                                    <span class="search-result-arrow">→</span>
-                                </div>
-                            </div>
+                            <div class="search-result-preview">${preview}</div>
+                            <div class="search-result-location">📍 ${lineNumber}</div>
                         </div>
                     `;
                 });
-
                 this.searchResultsList.innerHTML = html;
             }
 
@@ -1078,25 +986,15 @@
                 this.currentMatchIndex = index;
                 this.highlightCurrentMatch();
                 this.updateMatchCounter();
-                
-                const highlights = document.querySelectorAll('.highlight');
-                if (highlights[index]) {
-                    highlights[index].scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'center'
-                    });
-                }
             }
 
             navigateMatches(direction) {
                 if (this.matches.length === 0) return;
-                
                 if (direction === 'next') {
                     this.currentMatchIndex = (this.currentMatchIndex + 1) % this.matches.length;
                 } else {
                     this.currentMatchIndex = (this.currentMatchIndex - 1 + this.matches.length) % this.matches.length;
                 }
-                
                 this.highlightCurrentMatch();
                 this.updateMatchCounter();
             }
@@ -1109,27 +1007,19 @@
                 const savedFont = localStorage.getItem('fontStyle') || 'default';
                 const savedSize = localStorage.getItem('fontSize') || '18';
                 const savedLine = localStorage.getItem('lineHeight') || '1.8';
-                
                 this.applyFont(savedFont);
                 this.page.style.fontSize = savedSize + 'px';
                 this.page.style.lineHeight = savedLine;
             }
 
             applyFont(style) {
-                switch(style) {
-                    case 'default':
-                        this.page.style.fontFamily = "'Courier New', 'Georgia', serif";
-                        break;
-                    case 'hand':
-                        this.page.style.fontFamily = "'Caveat', 'Courier New', cursive";
-                        break;
-                    case 'print':
-                        this.page.style.fontFamily = "'Times New Roman', 'Georgia', serif";
-                        break;
-                    case 'modern':
-                        this.page.style.fontFamily = "'Roboto', 'Arial', sans-serif";
-                        break;
-                }
+                const fonts = {
+                    'default': "'Courier New', 'Georgia', serif",
+                    'hand': "'Caveat', 'Courier New', cursive",
+                    'print': "'Times New Roman', 'Georgia', serif",
+                    'modern': "'Roboto', 'Arial', sans-serif"
+                };
+                this.page.style.fontFamily = fonts[style] || fonts.default;
                 localStorage.setItem('fontStyle', style);
             }
 
@@ -1138,9 +1028,7 @@
                     btn.addEventListener('click', (e) => {
                         document.querySelectorAll('.font-btn').forEach(b => b.classList.remove('active'));
                         e.target.classList.add('active');
-                        
-                        const font = e.target.dataset.font;
-                        this.applyFont(font);
+                        this.applyFont(e.target.dataset.font);
                         this.showStatus('✨ Шрифт изменен');
                     });
                 });
@@ -1165,80 +1053,19 @@
 
                 const savedFont = localStorage.getItem('fontStyle') || 'default';
                 document.querySelectorAll('.font-btn').forEach(btn => {
-                    if (btn.dataset.font === savedFont) {
-                        btn.classList.add('active');
-                    }
+                    if (btn.dataset.font === savedFont) btn.classList.add('active');
                 });
             }
 
             toggleFontPanel() {
-                const panel = document.getElementById('fontPanel');
-                const btn = document.getElementById('toggleFontPanel');
-                
-                if (panel.classList.contains('show')) {
-                    panel.classList.remove('show');
-                    btn.textContent = '✎ Настройки шрифта';
-                } else {
-                    panel.classList.add('show');
-                    btn.textContent = '✕ Закрыть настройки';
-                }
+                document.getElementById('fontPanel').classList.toggle('show');
+                document.getElementById('toggleFontPanel').textContent = 
+                    document.getElementById('fontPanel').classList.contains('show') ? '✕ Закрыть' : '✎ Настройки';
             }
 
             showStatus(message) {
                 this.status.textContent = message;
-                setTimeout(() => {
-                    this.status.textContent = '';
-                }, 1500);
-            }
-
-            addFromLink() {
-                const url = prompt('Вставьте ссылку на книгу:', '');
-                if (!url) return;
-                
-                try {
-                    const urlParams = new URLSearchParams(new URL(url).search);
-                    const data = urlParams.get('data');
-                    
-                    if (data) {
-                        const jsonStr = decodeURIComponent(atob(data));
-                        const bookData = JSON.parse(jsonStr);
-                        
-                        if (bookData.books) {
-                            const bookId = Object.keys(bookData.books)[0];
-                            const book = bookData.books[bookId];
-                            
-                            this.books.push({
-                                id: 'book_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
-                                title: book.title,
-                                content: book.content
-                            });
-                            
-                            this.saveBooks();
-                            this.renderBooksList();
-                            
-                            this.currentBookId = this.books[this.books.length - 1].id;
-                            this.loadCurrentBook();
-                            
-                            this.showStatus('✅ Книга добавлена');
-                        }
-                    }
-                } catch (e) {
-                    this.showStatus('❌ Неверная ссылка');
-                }
-            }
-
-            checkOnline() {
-                window.addEventListener('offline', () => {
-                    this.offlineBadge.classList.add('show');
-                });
-                
-                window.addEventListener('online', () => {
-                    this.offlineBadge.classList.remove('show');
-                });
-                
-                if (!navigator.onLine) {
-                    this.offlineBadge.classList.add('show');
-                }
+                setTimeout(() => this.status.textContent = '', 1500);
             }
 
             setupInstall() {
@@ -1255,19 +1082,13 @@
                     if (!deferredPrompt) return;
                     deferredPrompt.prompt();
                     const { outcome } = await deferredPrompt.userChoice;
-                    if (outcome === 'accepted') {
-                        installBtn.style.display = 'none';
-                    }
+                    if (outcome === 'accepted') installBtn.style.display = 'none';
                 });
             }
 
             init() {
-                this.loadFromUrl();
                 this.loadBooks();
-                
-                if (this.books.length === 0) {
-                    this.createNewBook('Моя книга');
-                }
+                if (this.books.length === 0) this.createNewBook('Моя книга');
                 
                 const lastBookId = localStorage.getItem('lastBookId');
                 if (lastBookId && this.books.find(b => b.id === lastBookId)) {
@@ -1278,35 +1099,6 @@
                 
                 this.loadCurrentBook();
                 this.renderBooksList();
-                this.attachEvents();
-            }
-
-            loadFromUrl() {
-                const urlParams = new URLSearchParams(window.location.search);
-                const data = urlParams.get('data');
-                
-                if (data) {
-                    try {
-                        const jsonStr = decodeURIComponent(atob(data));
-                        const bookData = JSON.parse(jsonStr);
-                        
-                        if (bookData.books) {
-                            const bookId = Object.keys(bookData.books)[0];
-                            const book = bookData.books[bookId];
-                            
-                            this.books.push({
-                                id: 'book_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
-                                title: book.title,
-                                content: book.content
-                            });
-                            
-                            this.saveBooks();
-                            this.showStatus('✅ Книга добавлена');
-                            return true;
-                        }
-                    } catch (e) {}
-                }
-                return false;
             }
 
             saveBooks() {
@@ -1339,20 +1131,17 @@
                     title: title,
                     content: ''
                 };
-                
                 this.books.push(newBook);
                 this.currentBookId = newBook.id;
                 this.saveBooks();
                 this.loadCurrentBook();
                 this.renderBooksList();
-                this.showStatus('✅ Новая книга создана');
+                this.showStatus('✅ Новая книга');
             }
 
             switchBook(id) {
                 const currentBook = this.books.find(b => b.id === this.currentBookId);
-                if (currentBook) {
-                    currentBook.content = this.writingArea.innerHTML;
-                }
+                if (currentBook) currentBook.content = this.writingArea.innerHTML;
                 
                 this.currentBookId = id;
                 this.loadCurrentBook();
@@ -1362,23 +1151,19 @@
 
             deleteCurrentBook() {
                 if (this.books.length <= 1) {
-                    this.showStatus('❌ Нельзя удалить последнюю книгу');
+                    this.showStatus('❌ Нельзя удалить последнюю');
                     return;
                 }
                 
-                const currentBook = this.books.find(b => b.id === this.currentBookId);
-                if (confirm(`Удалить книгу "${currentBook.title}"?`)) {
+                if (confirm(`Удалить книгу?`)) {
                     const currentIndex = this.books.findIndex(b => b.id === this.currentBookId);
-                    
                     this.books = this.books.filter(b => b.id !== this.currentBookId);
-                    
                     const newIndex = currentIndex > 0 ? currentIndex - 1 : 0;
                     this.currentBookId = this.books[newIndex].id;
-                    
                     this.saveBooks();
                     this.loadCurrentBook();
                     this.renderBooksList();
-                    this.showStatus('🗑️ Книга удалена');
+                    this.showStatus('🗑️ Удалено');
                 }
             }
 
@@ -1394,41 +1179,15 @@
                 }
             }
 
-            shareCurrentBook() {
-                const book = this.books.find(b => b.id === this.currentBookId);
-                book.content = this.writingArea.innerHTML;
-                this.saveBooks();
-                
-                const shareData = {
-                    books: {
-                        [book.id]: {
-                            title: book.title,
-                            content: book.content
-                        }
-                    }
-                };
-                
-                const jsonStr = JSON.stringify(shareData);
-                const encoded = btoa(encodeURIComponent(jsonStr));
-                const url = window.location.href.split('?')[0] + '?data=' + encoded;
-                
-                navigator.clipboard.writeText(url).then(() => {
-                    this.showStatus('✅ Ссылка скопирована!');
-                }).catch(() => {
-                    prompt('Скопируй ссылку:', url);
-                });
-            }
-
             deleteBook(id, event) {
                 event.stopPropagation();
                 
                 if (this.books.length <= 1) {
-                    this.showStatus('❌ Нельзя удалить последнюю книгу');
+                    this.showStatus('❌ Нельзя удалить последнюю');
                     return;
                 }
                 
-                const book = this.books.find(b => b.id === id);
-                if (confirm(`Удалить книгу "${book.title}"?`)) {
+                if (confirm(`Удалить?`)) {
                     if (id === this.currentBookId) {
                         const currentIndex = this.books.findIndex(b => b.id === id);
                         this.books = this.books.filter(b => b.id !== id);
@@ -1441,7 +1200,7 @@
                     
                     this.saveBooks();
                     this.renderBooksList();
-                    this.showStatus('🗑️ Книга удалена');
+                    this.showStatus('🗑️ Удалено');
                 }
             }
 
@@ -1450,44 +1209,15 @@
                 this.bookCount.textContent = this.books.length;
                 
                 this.books.forEach(book => {
-                    const isActive = book.id === this.currentBookId ? 'active' : '';
-                    
                     html += `
-                        <div class="book-tab ${isActive}" onclick="app.switchBook('${book.id}')">
+                        <div class="book-tab ${book.id === this.currentBookId ? 'active' : ''}" 
+                             onclick="app.switchBook('${book.id}')">
                             <span>${book.title}</span>
                             <span class="delete-book" onclick="app.deleteBook('${book.id}', event)">✕</span>
                         </div>
                     `;
                 });
-                
                 this.booksList.innerHTML = html;
-            }
-
-            attachEvents() {
-                this.writingArea.addEventListener('input', () => {
-                    const book = this.books.find(b => b.id === this.currentBookId);
-                    if (book) {
-                        book.content = this.writingArea.innerHTML;
-                        this.saveBooks();
-                    }
-                });
-
-                document.getElementById('addBookBtn').addEventListener('click', () => {
-                    const title = prompt('Название новой книги:', 'Новая книга');
-                    if (title) this.createNewBook(title);
-                });
-
-                document.getElementById('renameBookBtn').addEventListener('click', () => {
-                    this.renameCurrentBook();
-                });
-
-                document.getElementById('deleteBookBtn').addEventListener('click', () => {
-                    this.deleteCurrentBook();
-                });
-
-                document.getElementById('shareBookBtn').addEventListener('click', () => {
-                    this.shareCurrentBook();
-                });
             }
         }
 
