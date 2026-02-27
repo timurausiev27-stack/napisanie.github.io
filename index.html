@@ -31,35 +31,61 @@
         }
 
         /* Полноэкранный режим */
-        body.fullscreen {
+        body.fullscreen-mode {
             padding: 0;
-            background: #1d352a;
+            background: #fffcf0;
         }
 
-        body.fullscreen .book-container {
+        body.fullscreen-mode .books-panel,
+        body.fullscreen-mode .search-panel,
+        body.fullscreen-mode .action-buttons,
+        body.fullscreen-mode .status,
+        body.fullscreen-mode .bookmark,
+        body.fullscreen-mode .toggle-font-panel,
+        body.fullscreen-mode .install-btn,
+        body.fullscreen-mode .offline-badge,
+        body.fullscreen-mode .font-panel,
+        body.fullscreen-mode .search-results,
+        body.fullscreen-mode .fullscreen-btn .fullscreen-text,
+        body.fullscreen-mode .book-header {
+            display: none !important;
+        }
+
+        body.fullscreen-mode .fullscreen-btn {
+            background: rgba(44, 24, 16, 0.8);
+            color: #d4af37;
+            border-color: #d4af37;
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+
+        body.fullscreen-mode .fullscreen-btn .fullscreen-icon {
+            font-size: 18px;
+        }
+
+        body.fullscreen-mode .book-container {
             max-width: 100%;
             height: 100vh;
             margin: 0;
-            border-radius: 0;
+            padding: 0;
         }
 
-        body.fullscreen .page {
+        body.fullscreen-mode .page {
+            height: 100vh;
+            max-height: none;
             border-radius: 0;
             box-shadow: none;
             border: none;
-            border-left: 2px solid #b87c4b;
-            border-right: 2px solid #b87c4b;
+            padding: 40px 60px;
         }
 
-        body.fullscreen .books-panel,
-        body.fullscreen .search-panel,
-        body.fullscreen .action-buttons,
-        body.fullscreen .status,
-        body.fullscreen .bookmark,
-        body.fullscreen .toggle-font-panel,
-        body.fullscreen .install-btn,
-        body.fullscreen .offline-badge {
-            border-radius: 0;
+        body.fullscreen-mode .page-header {
+            display: none; /* Прячем заголовок страницы в полноэкранном режиме */
+        }
+
+        body.fullscreen-mode .writing-area {
+            height: 100%;
+            min-height: 100%;
         }
 
         .book-container {
@@ -82,18 +108,22 @@
             cursor: pointer;
             font-family: 'Georgia', serif;
             font-weight: bold;
-            z-index: 2000;
+            z-index: 9999;
             font-size: 14px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 8px;
             transition: all 0.3s;
         }
 
         .fullscreen-btn:hover {
             background: #e5c158;
             transform: scale(1.05);
+        }
+
+        .fullscreen-icon {
+            font-size: 20px;
         }
 
         /* Кнопка установки */
@@ -110,7 +140,7 @@
             font-family: 'Georgia', serif;
             font-weight: bold;
             display: none;
-            z-index: 2000;
+            z-index: 9999;
             font-size: 16px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
@@ -128,7 +158,7 @@
             cursor: pointer;
             font-family: 'Georgia', serif;
             font-weight: bold;
-            z-index: 2000;
+            z-index: 9999;
             font-size: 16px;
             box-shadow: 0 5px 20px rgba(0,0,0,0.5);
             transition: all 0.3s;
@@ -146,7 +176,7 @@
             display: none;
             gap: 15px;
             flex-wrap: wrap;
-            z-index: 2000;
+            z-index: 9999;
             backdrop-filter: blur(5px);
             box-shadow: 0 5px 20px rgba(0,0,0,0.5);
             max-width: 90vw;
@@ -476,7 +506,7 @@
 
         .page {
             width: 100%;
-            height: 600px;
+            height: 500px;
             max-height: 60vh;
             background: #fffcf0;
             border-radius: 20px;
@@ -484,7 +514,7 @@
                 0 20px 40px rgba(0, 0, 0, 0.6),
                 0 0 0 2px #b87c4b,
                 0 0 0 6px #5d3a1a;
-            padding: 40px 50px;
+            padding: 30px 40px;
             position: relative;
             overflow-y: auto;
             font-family: 'Courier New', 'Georgia', serif;
@@ -498,8 +528,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
             border-bottom: 2px solid #d4b99b;
             font-family: 'Georgia', serif;
             font-style: italic;
@@ -514,7 +544,7 @@
 
         .writing-area {
             width: 100%;
-            min-height: calc(100% - 100px);
+            min-height: calc(100% - 60px);
             outline: none;
             white-space: pre-wrap;
             word-wrap: break-word;
@@ -598,7 +628,7 @@
             font-size: 14px;
             display: none;
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            z-index: 1000;
+            z-index: 9999;
         }
 
         .offline-badge.show {
@@ -626,8 +656,8 @@
 <body>
     <!-- Кнопка полноэкранного режима -->
     <button class="fullscreen-btn" id="fullscreenBtn">
-        <span id="fullscreenIcon">⛶</span>
-        <span id="fullscreenText">На весь экран</span>
+        <span class="fullscreen-icon" id="fullscreenIcon">⛶</span>
+        <span class="fullscreen-text" id="fullscreenText">На весь экран</span>
     </button>
 
     <button class="install-btn" id="installBtn">📥 Установить на ПК</button>
@@ -789,9 +819,9 @@
 
             // Переключение полноэкранного режима
             toggleFullscreen() {
-                document.body.classList.toggle('fullscreen');
+                document.body.classList.toggle('fullscreen-mode');
                 
-                if (document.body.classList.contains('fullscreen')) {
+                if (document.body.classList.contains('fullscreen-mode')) {
                     this.fullscreenIcon.textContent = '✕';
                     this.fullscreenText.textContent = 'Выйти';
                 } else {
@@ -799,7 +829,7 @@
                     this.fullscreenText.textContent = 'На весь экран';
                 }
                 
-                this.showStatus(document.body.classList.contains('fullscreen') ? '📺 Полноэкранный режим' : '📺 Обычный режим');
+                this.showStatus(document.body.classList.contains('fullscreen-mode') ? '📺 Полноэкранный режим' : '📺 Обычный режим');
             }
 
             // Очистить поле поиска
